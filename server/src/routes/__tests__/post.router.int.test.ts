@@ -42,7 +42,7 @@ beforeAll(async () => {
 afterAll(async () => {
     await mongoose.connection.dropCollection('users');
     await mongoose.connection.dropCollection('posts');
-    await mongoose.connection.close()
+    await mongoose.connection.close();
 });
 
 beforeEach(async () => {
@@ -117,7 +117,7 @@ describe('POST /api/posts', () => {
 
         expect(result.statusCode).toBe(401);
         expect(result.body.status).toBe('error');
-        expect(result.body.message).toBe('No hay token');
+        expect(result.body.message).toBe('Invalid token');
     });
 
     it('Error por token inválido', async () => {
@@ -267,12 +267,12 @@ describe('INVALID GET /api/posts', () => {
         expect(result.body.details._errors).toContain('Unrecognized key(s) in object: \'mod\'');
     });
 
-    it('Sin token: 401 + \'No hay token\'', async () => {
+    it('Sin token: 401 + \'Invalid token\'', async () => {
         const result = await request(app)
             .get('/api/posts');
 
         expect(result.statusCode).toBe(401);
-        expect(result.body.message).toBe('No hay token');
+        expect(result.body.message).toBe('Invalid token');
     });
 
     it('Token inválido o caducado: 401 + \'Token inválido o caducado\'', async () => {

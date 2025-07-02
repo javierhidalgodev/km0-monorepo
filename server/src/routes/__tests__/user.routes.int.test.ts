@@ -143,7 +143,7 @@ describe('POST /api/profile', () => {
             .get('/api/profile');
 
         expect(profile.statusCode).toBe(401);
-        expect(profile.body.message).toBe('No hay token');
+        expect(profile.body.message).toBe('Invalid token');
     });
 
     it('Token inválido o caducado devuelve AppError', async () => {

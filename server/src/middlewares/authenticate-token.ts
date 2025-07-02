@@ -8,7 +8,7 @@ export const authenticateToken =
         const token = req.headers.authorization;
         
         if(!token) {
-            throw new AppError(401, 'No hay token');
+            throw new AppError(401, 'Invalid token');
         };
 
         try {
