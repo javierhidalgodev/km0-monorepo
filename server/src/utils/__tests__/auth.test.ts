@@ -6,7 +6,7 @@ jest.mock('bcrypt');
 
 const mockBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
 
-describe.skip('Hash de password', () => {
+describe('Hash de password', () => {
 
     it('Error de password null', async () => {
         mockBcrypt.hash.mockImplementation(() => {

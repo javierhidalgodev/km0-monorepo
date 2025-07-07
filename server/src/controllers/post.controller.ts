@@ -66,8 +66,6 @@ export const handleGetPostDetail = async (
     try {
         const response = await getPostDetail(postID);
 
-        console.log(response);
-
         res.status(200).json(response);
     } catch (error) {
         next(error);

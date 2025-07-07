@@ -1,6 +1,5 @@
-import request from 'supertest'
-import app from '../../../app'
-import mongoose from 'mongoose';
+import request from 'supertest';
+import app from '@/app';
 
 export const createComment = async (token: string, postID: string) => {
     return await request(app)
@@ -9,8 +8,4 @@ export const createComment = async (token: string, postID: string) => {
             content: 'Menuda carrera papá!',
         })
         .auth(token, { type: 'bearer' });
-}
-
-export const generateObjectId = (): string => {
-    return new mongoose.Types.ObjectId().toString();
 }

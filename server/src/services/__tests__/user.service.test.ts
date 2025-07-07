@@ -1,17 +1,21 @@
 import { UserModel } from '../../models/user.model';
 import { AppError } from '../../utils/app-error';
-import { comparePassword, generateToken, hashPassword } from '../../utils/auth';
+import { comparePassword, generateToken } from '../../utils/auth';
 import { createUser, loginUser } from '../user.service';
 
 // v.1
 
-jest.mock('../../models/user.model.ts');
-jest.mock('../../utils/auth.ts');
+jest.mock('../../models/user.model');
+jest.mock('../../utils/auth');
 
 const mockFindOne = UserModel.findOne as jest.Mock;
 const mockCreate = UserModel.create as jest.Mock;
 const mockCompare = comparePassword as jest.Mock;
 const mockGenerateToken = generateToken as jest.Mock;
+
+beforeAll(() => {
+    jest.clearAllMocks()
+})
 
 describe('createUser (mocked)', () => {
     beforeEach(() => {

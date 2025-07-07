@@ -16,14 +16,14 @@ beforeAll(async () => {
 afterAll(async () => {
     // Limpiar la base de datos y desconectar
     // después de todos los test
-    // await mongoose.connection.dropDatabase();
+    await mongoose.connection.dropCollection('users');
     await mongoose.connection.close();
 });
 
 beforeEach(async () => {
     // Antes de cada test borrar todos los registros de
     // la colección de users
-    await UserModel.deleteMany({});
+    await mongoose.connection.dropCollection('users')
 })
 
 describe('POST /api/users', () => {

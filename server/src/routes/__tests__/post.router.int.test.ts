@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 import request from 'supertest';
 import app from '../../app';
-import { createPost, createPosts, createVariousPosts, PostDataToTest } from './helpers/post.routes.helpers';
+import { createPost, createPosts, createVariousPosts, PostDataToTest } from '../../helpers/post.routes.helpers';
 import { loginUser } from '@/services/user.service';
-import { generateObjectId } from './helpers/comment.routes.helpers';
+import { generateObjectId } from '../../helpers/generic.routes.helpers';
 
 const MONGO_DB_URI = process.env.MONGO_DB_URI || 'mongodb://localhost:27017/km0-dev';
 let token: string;

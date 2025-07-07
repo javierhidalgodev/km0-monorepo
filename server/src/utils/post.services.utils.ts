@@ -1,6 +1,6 @@
-import { PostResponseDTO } from "../../dtos/get-post.dto";
-import { PopulatePost, PostModel } from "../../models/post.model";
-import { IPostsQueryParams } from "../../schemas/post.schema";
+import { PostResponseDTO } from '@/dtos/get-post.dto';
+import { PopulatePost, PostModel } from '@/models/post.model';
+import { IPostsQueryParams } from '@/schemas/post.schema';
 
 export interface PostFilter extends IPostsQueryParams {
     user?: string;

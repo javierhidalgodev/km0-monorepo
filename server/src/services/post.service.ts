@@ -3,12 +3,12 @@ import { GetPostsResponseDTO } from '@/dtos/get-post.dto';
 import { IPost, PopulatePost, PostModel } from '@/models/post.model';
 import { UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
-import { getPosts, mapPosts } from './utils/post.services.utils';
+import { getPosts, mapPosts } from '@/utils/post.services.utils';
 import { IPostsQueryParams } from '@/schemas/post.schema';
 import { DeletePostResponseDTO } from '@/dtos/delete-post.dto';
 import { GetPostDetailResponseDTO } from '@/dtos/get-post-detail.dto';
 import { CommentModel, PopulateComment } from '@/models/comment.model';
-import { mapComments } from './utils/comment.service.utils';
+import { mapComments } from '@/utils/comment.service.utils';
 
 export const createPost = async (userID: string, data: CreatePostRequestDTO): Promise<CreatePostResponseDTO> => {
     const user = await UserModel.findById(userID);
