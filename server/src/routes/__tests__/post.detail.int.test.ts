@@ -1,10 +1,10 @@
-import app from '@/app';
-import { createComment } from '@/services/comment.service';
-import { createPost } from '@/services/post.service';
-import { createUser, loginUser } from '@/services/user.service';
 import mongoose from 'mongoose';
 import request from 'supertest';
-import { generateObjectId } from '../../helpers/generic.routes.helpers';
+import app from '@/app';
+import { createPost } from '@/services/post.service';
+import { createUser, loginUser } from '@/services/user.service';
+import { createComment } from '@/services/comment.service';
+import { generateObjectId } from '@/helpers/generic.routes.helpers';
 
 const MONGO_DB_URI = process.env.MONGO_DB_URI || 'mongodb://localhost:27017/km0-dev';
 let token: string;

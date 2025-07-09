@@ -1,32 +1,26 @@
 import { PostResponseDTO } from '@/dtos/get-post.dto';
-import { PopulatePost, PostModel } from '@/models/post.model';
+import { IPost, PopulatePost, PostModel } from '@/models/post.model';
 import { IPostsQueryParams } from '@/schemas/post.schema';
+import { FilterQuery, Query } from 'mongoose';
 
 export interface PostFilter extends IPostsQueryParams {
     user?: string;
 }
 
-// TODO: revisar porqué paso el userID ¿para recuperar comentarios de un usuario concreto?
-export const getPosts = async (queryParams?: IPostsQueryParams, userID?: string): Promise<PopulatePost[]> => {
-    const filter: Partial<PostFilter> = {};
-
-    if (userID) {
-        filter.user = userID
-    }
-
-    if (queryParams) {
-        if (queryParams.activity) filter.activity = queryParams.activity
-        if (queryParams.mood) filter.mood = queryParams.mood
-    }
-
-    // if(queryParams) {
-    //     Object.entries(queryParams).forEach(([ key, value ]) => {
-    //         filter[key] = value;
-    //     });
-    // }
+export const getPosts = async (
+    queryParams?: IPostsQueryParams,
+    userID?: string,
+): Promise<PopulatePost[]> => {
+    const query: FilterQuery<IPost> = {
+        $or: [
+            { isPublic: true },
+            ...(userID ? [{ user: userID }] : []),
+        ],
+        ...queryParams,
+    };
 
     return await PostModel
-        .find(filter)
+        .find(query)
         .sort({ createdAt: -1 })
         .populate('user', 'username')
         .lean<PopulatePost[]>();
@@ -34,6 +28,8 @@ export const getPosts = async (queryParams?: IPostsQueryParams, userID?: string)
 
 // Se podrían tipar como Posts[]
 export const mapPosts = (posts: PopulatePost[]): PostResponseDTO[] => {
+    // const publicPosts = posts.filter(p => p.isPublic);
+
     return posts.map((p: PopulatePost) => ({
         id: p.id,
         user: {
@@ -42,6 +38,7 @@ export const mapPosts = (posts: PopulatePost[]): PostResponseDTO[] => {
         },
         text: p.text ?? undefined,
         activity: p.activity,
+        isPublic: p.isPublic,
         mood: p.mood,
         createdAt: p.createdAt,
     }));

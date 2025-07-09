@@ -1,12 +1,12 @@
-import { UserModel } from '../../models/user.model';
-import { AppError } from '../../utils/app-error';
-import { comparePassword, generateToken } from '../../utils/auth';
-import { createUser, loginUser } from '../user.service';
+import { UserModel } from '@/models/user.model';
+import { AppError } from '@/utils/app-error';
+import { comparePassword, generateToken } from '@/utils/auth';
+import { createUser, loginUser } from '@/services/user.service';
 
 // v.1
 
-jest.mock('../../models/user.model');
-jest.mock('../../utils/auth');
+jest.mock('@/models/user.model');
+jest.mock('@/utils/auth');
 
 const mockFindOne = UserModel.findOne as jest.Mock;
 const mockCreate = UserModel.create as jest.Mock;
@@ -122,7 +122,7 @@ describe('loginUser (mocked', () => {
             password: '12345'
         })).rejects.toThrow(AppError);
         expect(mockFindOne).toHaveBeenCalledWith({ email: 'demo@mail.com' });
-        expect(mockCompare).toHaveBeenCalledWith("12345", "123456");
+        expect(mockCompare).toHaveBeenCalledWith('12345', '123456');
     })
 })
 

@@ -9,6 +9,7 @@ export interface PostResponseDTO {
     text?: string;
     activity: TActivity;
     mood: TMood;
+    isPublic: boolean;
     createdAt: Date;
 };
 

@@ -1,6 +1,6 @@
-import { AppError } from '../app-error';
-import { hashPassword } from '../auth';
 import bcrypt from 'bcrypt';
+import { AppError } from '@/utils/app-error';
+import { hashPassword } from '@/utils/auth';
 
 jest.mock('bcrypt');
 

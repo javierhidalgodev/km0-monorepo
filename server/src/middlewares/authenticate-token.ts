@@ -17,7 +17,7 @@ export const authenticateToken =
             req.user = verifiedToken;
             next();
         } catch (error) {
-            next(error)
+            next(error);
         };
     };
 };

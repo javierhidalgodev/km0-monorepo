@@ -4,6 +4,7 @@ import { authenticateToken } from '@/middlewares/authenticate-token';
 import { validate, validateObjectID } from '@/middlewares/validate';
 import { createPostSchema, postQuerySchema } from '@/schemas/post.schema';
 import { checkOwnership } from '@/middlewares/check-ownership';
+import { parseToken } from '@/middlewares/parse-token';
 
 const postRoutes = Router();
 
@@ -16,7 +17,7 @@ postRoutes.post(
 
 postRoutes.get(
     '/posts',
-    authenticateToken(),
+    parseToken(),
     validate(postQuerySchema, 'query'),
     handleGetPosts,
 );

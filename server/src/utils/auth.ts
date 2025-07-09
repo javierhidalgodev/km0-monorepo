@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt';
-import jwt, { JsonWebTokenError } from 'jsonwebtoken';
-import { AppError } from './app-error';
-import { IUser } from '../models/user.model';
-import { TokenPayload } from '../types/token-payload';
+import jwt from 'jsonwebtoken';
+import { AppError } from '@/utils/app-error';
+import { IUser } from '@/models/user.model';
+import { TokenPayload } from '@/types/token-payload';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'el_que_tengo_aqui_colgado';
 

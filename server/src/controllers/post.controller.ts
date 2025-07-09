@@ -5,6 +5,7 @@ import { CreatePostResponseDTO } from '@/dtos/create-post.dto';
 import { GetPostsResponseDTO } from '@/dtos/get-post.dto';
 import { DeletePostResponseDTO } from '@/dtos/delete-post.dto';
 import { GetPostDetailResponseDTO } from '@/dtos/get-post-detail.dto';
+import { verifyToken } from '@/utils/auth';
 
 export const handlePostCreation = async (
     req: Request,
@@ -33,7 +34,7 @@ export const handleGetPosts = async (
     next: NextFunction,
 ) => {
     try {
-        const response = await getAllPosts(req.query);
+        const response = await getAllPosts(req.query, req.user ? req.user.id : undefined);
 
         res.status(200).json(response);
     } catch (error) {
@@ -80,7 +81,7 @@ export const handleDeletePost = async (
     const post = req.post;
     const tokenPayload = req.user;
 
-    if(!tokenPayload) {
+    if (!tokenPayload) {
         return next(new AppError(401, 'Invalid token'));
     };
 

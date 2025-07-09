@@ -1,12 +1,13 @@
 import mongoose from 'mongoose';
 import request from 'supertest';
-import app from '../../app';
-import { createPost, createPosts, createVariousPosts, PostDataToTest } from '../../helpers/post.routes.helpers';
+import app from '@/app';
 import { loginUser } from '@/services/user.service';
-import { generateObjectId } from '../../helpers/generic.routes.helpers';
+import { createPost, createPosts, createVariousPosts, PostDataToTest } from '@/helpers/post.routes.helpers';
+import { generateObjectId } from '@/helpers/generic.routes.helpers';
 
 const MONGO_DB_URI = process.env.MONGO_DB_URI || 'mongodb://localhost:27017/km0-dev';
 let token: string;
+let token2: string;
 
 beforeAll(async () => {
     await mongoose.connect(MONGO_DB_URI);
@@ -29,14 +30,23 @@ beforeAll(async () => {
             password: '123456',
         });
 
-    const response = await request(app)
+    const login = await request(app)
         .post('/api/login')
         .send({
             email: 'demo@mail.com',
             password: '123456',
         });
 
-    token = response.body.token;
+    token = login.body.token;
+
+    const login2 = await request(app)
+        .post('/api/login')
+        .send({
+            email: 'demo_2@mail.com',
+            password: '123456',
+        });
+
+    token2 = login2.body.token;
 });
 
 afterAll(async () => {
@@ -226,6 +236,53 @@ describe('VALID GET /api/posts', () => {
         expect(result.body.posts[0]).not.toHaveProperty('text');
         expect(result.body.posts[1]).toHaveProperty('text', 'Demo_3');
     });
+
+    it('Usuario NO LOGGEADO solo recupera posts públicos', async () => {
+        await createPosts(token, [
+            { activity: 'other', mood: 'bad', text: 'Demo_1', isPublic: false },
+            { activity: 'walk', mood: 'excellent', text: 'Demo_2', isPublic: false },
+            { activity: 'run', mood: 'bad', text: 'Demo_3' },
+            { activity: 'other', mood: 'good', text: 'Demo_4' },
+            { activity: 'run', mood: 'bad' },
+        ]);
+
+        const result = await request(app)
+            .get('/api/posts');
+
+        expect(result.statusCode).toBe(200);
+        expect(result.body.status).toBe('ok');
+        expect(result.body.posts.length).toBe(3);
+    });
+
+    it('Usuario LOGGEADO solo recupera posts públicos + propios', async () => {
+        await createPosts(token, [
+            { activity: 'other', mood: 'bad', text: 'Demo_1', isPublic: false },
+            { activity: 'walk', mood: 'excellent', text: 'Demo_2', isPublic: false },
+            { activity: 'run', mood: 'bad', text: 'Demo_3' },
+        ]);
+
+        await createPosts(token2, [
+            { activity: 'other', mood: 'good', text: 'Demo_4', isPublic: false },
+            { activity: 'run', mood: 'bad' },
+        ]);
+
+        const resultUser1 = await request(app)
+            .get('/api/posts')
+            .auth(token, { type: 'bearer' });
+
+        console.log(resultUser1.body.posts);
+
+        const resultUser2 = await request(app)
+            .get('/api/posts')
+            .auth(token2, { type: 'bearer' });
+
+        console.log(resultUser2.body.posts);
+
+        expect(resultUser1.statusCode).toBe(200);
+        expect(resultUser2.body.status).toBe('ok');
+        expect(resultUser1.body.posts.length).toBe(4);
+        expect(resultUser2.body.posts.length).toBe(3);
+    });
 });
 
 describe('INVALID GET /api/posts', () => {
@@ -260,20 +317,21 @@ describe('INVALID GET /api/posts', () => {
             .get('/api/posts?mod=bad')
             .auth(token, { type: 'bearer' });
 
-        // console.log(result.body.details);
-
         expect(result.statusCode).toBe(400);
         expect(result.body.message).toBe('Error de validación');
         expect(result.body.details._errors).toContain('Unrecognized key(s) in object: \'mod\'');
     });
 
-    it('Sin token: 401 + \'Invalid token\'', async () => {
-        const result = await request(app)
-            .get('/api/posts');
+    // DEPRECATED: El acceso a los posts es público
+    // devolviendo todos los públicos en caso 'no logged',
+    // y todos los públicos + privados propios en caso 'logged'
+    // it('Sin token: 401 + \'Invalid token\'', async () => {
+    //     const result = await request(app)
+    //         .get('/api/posts');
 
-        expect(result.statusCode).toBe(401);
-        expect(result.body.message).toBe('Invalid token');
-    });
+    //     expect(result.statusCode).toBe(401);
+    //     expect(result.body.message).toBe('Invalid token');
+    // });
 
     it('Token inválido o caducado: 401 + \'Token inválido o caducado\'', async () => {
         const result = await request(app)
@@ -283,31 +341,6 @@ describe('INVALID GET /api/posts', () => {
         expect(result.statusCode).toBe(401);
         expect(result.body.message).toBe('Token inválido o caducado');
     });
-});
-
-describe('GET /api/posts/mine', () => {
-    it('Se recuperan con éxito los post del usuario loggeado', async () => {
-        await createVariousPosts(token);
-
-        const response = await request(app)
-            .get('/api/posts/mine')
-            .auth(token, { type: 'bearer' });
-
-        expect(response.statusCode).toBe(200);
-        expect(response.body.status).toBe('ok');
-        expect(response.body.posts).toHaveLength(3);
-        expect(response.body.posts[0].user.username).toBe('demo_user');
-    });
-
-    it('Pasando un token caducado, 401 + \'Token inválido o caducado\'', async () => {
-        const response = await request(app)
-            .get('/api/posts/mine')
-            .auth('123', { type: 'bearer' });
-
-        expect(response.statusCode).toBe(401);
-        expect(response.body.status).toBe('error');
-        expect(response.body.message).toBe('Token inválido o caducado');
-    })
 });
 
 describe('DELETE /api/posts/:postID', () => {

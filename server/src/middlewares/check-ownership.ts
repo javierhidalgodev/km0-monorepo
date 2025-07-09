@@ -1,7 +1,7 @@
-import { CommentModel } from "@/models/comment.model";
-import { PostModel } from "@/models/post.model";
-import { AppError } from "@/utils/app-error";
-import { RequestHandler } from "express";
+import { RequestHandler } from 'express';
+import { CommentModel } from '@/models/comment.model';
+import { PostModel } from '@/models/post.model';
+import { AppError } from '@/utils/app-error';
 
 export type ParamIDKey = 'postID' | 'commentID'
 
