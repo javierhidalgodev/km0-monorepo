@@ -6,6 +6,7 @@ import { createVariousPosts } from '@/helpers/post.routes.helpers';
 
 const MONGO_DB_URI = process.env.MONGO_DB_URI || 'mongodb://localhost:27017/km0-dev';
 let token: string;
+let token2: string;
 
 beforeAll(async () => {
     await mongoose.connect(MONGO_DB_URI);
@@ -27,6 +28,15 @@ beforeAll(async () => {
         });
 
     token = login.body.token;
+
+    const login2 = await request(app)
+        .post('/api/login')
+        .send({
+            email: 'demo_2@mail.com',
+            password: '123456',
+        });
+
+    token2 = login2.body.token;
 });
 
 afterAll(async () => {
@@ -61,5 +71,19 @@ describe('GET /api/posts/mine', () => {
         expect(response.statusCode).toBe(401);
         expect(response.body.status).toBe('error');
         expect(response.body.message).toBe('Token inválido o caducado');
+    })
+
+    it('Un usuario recupera solo sus post', async () => {
+        await createVariousPosts(token);
+        await createVariousPosts(token2);
+
+        const response = await request(app)
+            .get('/api/posts/mine')
+            .auth(token, { type: 'bearer' });
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body.status).toBe('ok');
+        expect(response.body.posts).toHaveLength(3);
+        expect(response.body.posts[0].user.username).toBe('demo_user');
     })
 });

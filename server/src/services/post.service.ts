@@ -3,7 +3,7 @@ import { GetPostsResponseDTO } from '@/dtos/get-post.dto';
 import { IPost, PopulatePost, PostModel } from '@/models/post.model';
 import { UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
-import { getPosts, mapPosts, PostFilter } from '@/utils/post.services.utils';
+import { getMine, getPosts, mapPosts, PostFilter } from '@/utils/post.services.utils';
 import { IPostsQueryParams } from '@/schemas/post.schema';
 import { DeletePostResponseDTO } from '@/dtos/delete-post.dto';
 import { GetPostDetailResponseDTO } from '@/dtos/get-post-detail.dto';
@@ -53,10 +53,13 @@ export const getAllPosts = async (
 }
 
 // TODO: revisar que funcione bien para traer todos los posts propios
-export const getPostsMine = async (_userID: string, queryParams?: IPostsQueryParams): Promise<GetPostsResponseDTO> => {
-    const response = await getPosts(queryParams);
+export const getPostsMine = async (
+    userID: string,
+    queryParams?: IPostsQueryParams
+): Promise<GetPostsResponseDTO> => {
+    const posts = await getMine(userID, queryParams);
 
-    const mappedPosts = mapPosts(response);
+    const mappedPosts = mapPosts(posts);
 
     return {
         status: 'ok',

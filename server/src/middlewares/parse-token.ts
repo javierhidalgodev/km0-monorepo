@@ -1,20 +1,16 @@
 import { RequestHandler } from 'express';
-import { verifyToken } from '@/utils/auth';
+import { extractUserFromAuthHeader } from '@/utils/auth';
 
 export const parseToken = (): RequestHandler => {
     return (req, _res, next) => {
         const token = req.headers.authorization;
 
-        if (token) {
-            try {
-                const verifiedToken = verifyToken(token);
-
-                req.user = verifiedToken;
-            } catch (error) {
-                return next(error);
-            };
+        try {
+            req.user = extractUserFromAuthHeader(token, false);
+        } catch (error) {
+            return next(error);
         };
-        
+
         next();
     };
 };

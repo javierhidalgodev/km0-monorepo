@@ -47,3 +47,16 @@ export const verifyToken = (token: string) => {
         throw new AppError(401, 'Token inválido o caducado');
     }
 }
+
+export const extractUserFromAuthHeader = (authHeader?: string, required = false): TokenPayload | undefined => {
+    if(!authHeader) {
+        if (required) throw new AppError(401, 'Invalid token');
+        return;
+    }
+
+    try {
+        return verifyToken(authHeader);
+    } catch (error) {
+        throw error;
+    }
+};

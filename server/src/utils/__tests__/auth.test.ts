@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { AppError } from '@/utils/app-error';
-import { hashPassword } from '@/utils/auth';
+import { extractUserFromAuthHeader, hashPassword } from '@/utils/auth';
 
 jest.mock('bcrypt');
 

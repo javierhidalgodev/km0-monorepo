@@ -11,11 +11,30 @@ export const getPosts = async (
     queryParams?: IPostsQueryParams,
     userID?: string,
 ): Promise<PopulatePost[]> => {
+
     const query: FilterQuery<IPost> = {
         $or: [
             { isPublic: true },
             ...(userID ? [{ user: userID }] : []),
         ],
+        ...queryParams,
+    };
+
+    console.log(query)
+    return await PostModel
+        .find(query)
+        .sort({ createdAt: -1 })
+        .populate('user', 'username')
+        .lean<PopulatePost[]>();
+}
+
+export const getMine = async (
+    userID: string,
+    queryParams?: IPostsQueryParams,
+): Promise<PopulatePost[]> => {
+
+    const query: FilterQuery<IPost> = {
+        user: userID,
         ...queryParams,
     };
 

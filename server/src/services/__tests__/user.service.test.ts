@@ -1,6 +1,6 @@
 import { UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
-import { comparePassword, generateToken } from '@/utils/auth';
+import { comparePassword, extractUserFromAuthHeader, generateToken, verifyToken } from '@/utils/auth';
 import { createUser, loginUser } from '@/services/user.service';
 
 // v.1
@@ -12,6 +12,9 @@ const mockFindOne = UserModel.findOne as jest.Mock;
 const mockCreate = UserModel.create as jest.Mock;
 const mockCompare = comparePassword as jest.Mock;
 const mockGenerateToken = generateToken as jest.Mock;
+const mockVerifyToken = verifyToken as jest.Mock;
+const mockExtractUserFromAuthHeader = extractUserFromAuthHeader as jest.Mock;
+
 
 beforeAll(() => {
     jest.clearAllMocks()
@@ -42,7 +45,7 @@ describe('createUser (mocked)', () => {
             user: {
                 username: 'demo_user',
                 email: 'demo@mail.com',
-                birthdate: '1990-01-01'
+                birthdate: '1990-01-01',
             }
         });
 
@@ -60,7 +63,7 @@ describe('createUser (mocked)', () => {
                 birthdate: '1990-01-01',
                 password: '123456',
             })
-        ).rejects.toThrow(AppError)
+        ).rejects.toThrow(AppError);
 
         expect(mockCreate).not.toHaveBeenCalledWith();
     });
@@ -93,38 +96,38 @@ describe('loginUser (mocked', () => {
                 username: 'demo_user',
                 email: 'demo@mail.com',
             },
-        })
+        });
         expect(result.token).toEqual('estoestutoken');
     });
 
-    it('lanza AppError porque no encuentra el email que se pide', async() => {
+    it('lanza AppError porque no encuentra el email que se pide', async () => {
         mockFindOne.mockResolvedValue(null);
 
         await expect(loginUser({
             email: 'demo@mail.com',
-            password: '123456'
+            password: '123456',
         })).rejects.toThrow(AppError);
         expect(mockFindOne).toHaveBeenCalledWith({ email: 'demo@mail.com' });
         expect(mockCompare).not.toHaveBeenCalled();
     })
 
-    it('lanza AppError porque las contraseñas no coinciden', async() => {
+    it('lanza AppError porque las contraseñas no coinciden', async () => {
         mockFindOne.mockResolvedValue({
             id: '684d66c89230e5415fab0c50',
             username: 'demo_user',
             email: 'demo@mail.com',
             password: '123456',
-        })
+        });
         mockCompare.mockResolvedValue(false);
 
         await expect(loginUser({
             email: 'demo@mail.com',
-            password: '12345'
+            password: '12345',
         })).rejects.toThrow(AppError);
         expect(mockFindOne).toHaveBeenCalledWith({ email: 'demo@mail.com' });
         expect(mockCompare).toHaveBeenCalledWith('12345', '123456');
-    })
-})
+    });
+});
 
 // v.0
 
@@ -156,7 +159,7 @@ describe('loginUser (mocked', () => {
 //     it('lanza un error si el email es invalido', () => {
 //         const dataErr = {
 //             ...data,
-//             email: 'testdemo.mail' 
+//             email: 'testdemo.mail'
 //         }
 
 //         expect(() => createUser(dataErr)).toThrow('Email inválido');
