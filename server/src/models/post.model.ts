@@ -9,13 +9,13 @@ export interface IPost extends Document {
     activity: TActivity;
     text?: string;
     mood: TMood;
-    isPublic: boolean;
 };
 
 export type PopulatePost = Omit<IPost, 'user'> & {
     user: {
         _id: string,
         username: string,
+        isPublic: boolean,
     },
 };
 
@@ -38,11 +38,6 @@ const postSchema = new Schema<IPost>({
         enum: ['excellent', 'good', 'regular', 'bad'],
         required: true,
     },
-    isPublic: {
-        type: Schema.Types.Boolean,
-        default: true,
-        required: true,
-    }
 }, {
     timestamps: true,
 });

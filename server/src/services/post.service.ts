@@ -33,7 +33,6 @@ export const createPost = async (userID: string, data: CreatePostRequestDTO): Pr
             text: post.text ?? undefined,
             activity: post.activity,
             mood: post.mood,
-            isPublic: post.isPublic,
             createdAt: post.createdAt,
         },
     };
@@ -91,7 +90,6 @@ export const getPostDetail = async (postID: string): Promise<GetPostDetailRespon
         activity: post.activity,
         mood: post.mood,
         comments: mappedComments,
-        isPublic: post.isPublic,
         createdAt: post.createdAt,
     };
 };

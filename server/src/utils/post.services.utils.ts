@@ -12,20 +12,23 @@ export const getPosts = async (
     userID?: string,
 ): Promise<PopulatePost[]> => {
 
-    const query: FilterQuery<IPost> = {
-        $or: [
-            { isPublic: true },
-            ...(userID ? [{ user: userID }] : []),
-        ],
-        ...queryParams,
-    };
+    // const query: FilterQuery<IPost> = {
+    //     $or: [
+    //         { isPublic: true },
+    //         ...(userID ? [{ user: userID }] : []),
+    //     ],
+    //     ...queryParams,
+    // };
 
-    console.log(query)
-    return await PostModel
-        .find(query)
+    const posts = await PostModel
+        .find({ ...queryParams })
         .sort({ createdAt: -1 })
-        .populate('user', 'username')
+        .populate('user', 'username isPublic')
         .lean<PopulatePost[]>();
+
+    return posts.filter(p =>
+        p.user._id.toString() === userID || p.user.isPublic
+    );
 }
 
 export const getMine = async (
@@ -57,7 +60,6 @@ export const mapPosts = (posts: PopulatePost[]): PostResponseDTO[] => {
         },
         text: p.text ?? undefined,
         activity: p.activity,
-        isPublic: p.isPublic,
         mood: p.mood,
         createdAt: p.createdAt,
     }));

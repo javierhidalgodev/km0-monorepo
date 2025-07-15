@@ -19,6 +19,7 @@ beforeAll(async () => {
             email: 'demo@mail.com',
             birthdate: '1990-01-01',
             password: '123456',
+            isPublic: false,
         });
 
     await request(app)
@@ -239,8 +240,8 @@ describe('VALID GET /api/posts', () => {
 
     it('Usuario NO LOGGEADO solo recupera posts públicos', async () => {
         await createPosts(token, [
-            { activity: 'other', mood: 'bad', text: 'Demo_1', isPublic: false },
-            { activity: 'walk', mood: 'excellent', text: 'Demo_2', isPublic: false },
+            { activity: 'other', mood: 'bad', text: 'Demo_1' },
+            { activity: 'walk', mood: 'excellent', text: 'Demo_2' },
             { activity: 'run', mood: 'bad', text: 'Demo_3' },
             { activity: 'other', mood: 'good', text: 'Demo_4' },
             { activity: 'run', mood: 'bad' },
@@ -251,18 +252,18 @@ describe('VALID GET /api/posts', () => {
 
         expect(result.statusCode).toBe(200);
         expect(result.body.status).toBe('ok');
-        expect(result.body.posts.length).toBe(3);
+        expect(result.body.posts.length).toBe(0);
     });
 
     it('Usuario LOGGEADO solo recupera posts públicos + propios', async () => {
         await createPosts(token, [
-            { activity: 'other', mood: 'bad', text: 'Demo_1', isPublic: false },
-            { activity: 'walk', mood: 'excellent', text: 'Demo_2', isPublic: false },
+            { activity: 'other', mood: 'bad', text: 'Demo_1' },
+            { activity: 'walk', mood: 'excellent', text: 'Demo_2' },
             { activity: 'run', mood: 'bad', text: 'Demo_3' },
         ]);
 
         await createPosts(token2, [
-            { activity: 'other', mood: 'good', text: 'Demo_4', isPublic: false },
+            { activity: 'other', mood: 'good', text: 'Demo_4' },
             { activity: 'run', mood: 'bad' },
         ]);
 
@@ -270,18 +271,14 @@ describe('VALID GET /api/posts', () => {
             .get('/api/posts')
             .auth(token, { type: 'bearer' });
 
-        console.log(resultUser1.body.posts);
-
         const resultUser2 = await request(app)
             .get('/api/posts')
             .auth(token2, { type: 'bearer' });
 
-        console.log(resultUser2.body.posts);
-
         expect(resultUser1.statusCode).toBe(200);
         expect(resultUser2.body.status).toBe('ok');
-        expect(resultUser1.body.posts.length).toBe(4);
-        expect(resultUser2.body.posts.length).toBe(3);
+        expect(resultUser1.body.posts.length).toBe(5);
+        expect(resultUser2.body.posts.length).toBe(2);
     });
 });
 
