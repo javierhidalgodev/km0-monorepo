@@ -10,9 +10,9 @@ export const handleUserCreation = async (
     res: Response<CreateUserResponseDTO>,
     next: NextFunction) => {
     try {
-        const { username, email, password, birthdate }: CreateUserRequestDTO = req.body;
+        const { username, email, password, birthdate, isPublic }: CreateUserRequestDTO = req.body;
 
-        const response = await createUser({ username, password, email, birthdate });
+        const response = await createUser({ username, password, email, birthdate, isPublic });
 
         res.status(201).json(response);
     } catch (error) {

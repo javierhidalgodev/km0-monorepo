@@ -1,9 +1,9 @@
-import request from 'supertest';
 import mongoose from 'mongoose';
-import { IUser, UserModel } from '../../models/user.model';
-import app from '../../app';
-import { createUser } from '../../services/user.service';
-import { generateToken } from '../../utils/auth';
+import request from 'supertest';
+import app from '@/app';
+import { IUser, UserModel } from '@/models/user.model';
+import { createUser } from '@/services/user.service';
+import { generateToken } from '@/utils/auth';
 
 const MONGO_DB_URI = process.env.MONGO_DB_URI || 'mongodb://localhost:27017/km0-test'
 

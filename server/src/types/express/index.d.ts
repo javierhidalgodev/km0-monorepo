@@ -1,6 +1,6 @@
-import { IPost } from "@/models/post.model"
-import { TokenPayload } from "../token-payload"
-import { IComment } from "@/models/comment.model"
+import { TokenPayload } from '@/types/token-payload'
+import { IPost } from '@/models/post.model'
+import { IComment } from '@/models/comment.model'
 
 declare global {
     namespace Express {

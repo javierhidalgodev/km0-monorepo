@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt';
-import jwt, { JsonWebTokenError } from 'jsonwebtoken';
-import { AppError } from './app-error';
-import { IUser } from '../models/user.model';
-import { TokenPayload } from '../types/token-payload';
+import jwt from 'jsonwebtoken';
+import { AppError } from '@/utils/app-error';
+import { IUser } from '@/models/user.model';
+import { TokenPayload } from '@/types/token-payload';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'el_que_tengo_aqui_colgado';
 
@@ -47,3 +47,16 @@ export const verifyToken = (token: string) => {
         throw new AppError(401, 'Token inválido o caducado');
     }
 }
+
+export const extractUserFromAuthHeader = (authHeader?: string, required = false): TokenPayload | undefined => {
+    if(!authHeader) {
+        if (required) throw new AppError(401, 'Invalid token');
+        return;
+    }
+
+    try {
+        return verifyToken(authHeader);
+    } catch (error) {
+        throw error;
+    }
+};

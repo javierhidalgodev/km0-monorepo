@@ -8,7 +8,8 @@ export const createUserSchema = z.object({
         const age = new Date().getFullYear() - new Date(dateStr).getFullYear();
         return age > 18;
     }, { message: 'Debe ser mayor de edad' }),
-});
+    isPublic: z.boolean().optional(),
+}).strict();
 
 export const loginSchema = z.object({
     email: z.string().email(),

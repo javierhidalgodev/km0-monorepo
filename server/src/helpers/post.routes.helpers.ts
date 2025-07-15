@@ -14,13 +14,14 @@ export const createPost = async (token: string):  Promise<CreatePostResponseDTO>
         .auth(token, { type: 'bearer' });
 
     return result.body;
-}
+};
 
 export type PostDataToTest = {
     activity: TActivity,
     mood: TMood,
     text?: string,
-}
+    isPublic?: boolean,
+};
 
 export const createPosts = async (token: string, postsData: PostDataToTest[]) => {
     for(const post of postsData) {
@@ -28,8 +29,8 @@ export const createPosts = async (token: string, postsData: PostDataToTest[]) =>
             .post('/api/posts')
             .send(post)
             .auth(token, { type: 'bearer' });
-    }
-}
+    };
+};
 
 export const createVariousPosts = async (token: string, count = 3) => {
     const post = [];
@@ -37,7 +38,7 @@ export const createVariousPosts = async (token: string, count = 3) => {
     for(let i = 0; i < count; i++) {
         const res = await createPost(token);
         post.push(res);
-    }
+    };
 
     return post;
-}
+};

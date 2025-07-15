@@ -15,6 +15,7 @@ export type PopulatePost = Omit<IPost, 'user'> & {
     user: {
         _id: string,
         username: string,
+        isPublic: boolean,
     },
 };
 
