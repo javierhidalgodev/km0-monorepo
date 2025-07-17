@@ -65,7 +65,7 @@ export const handleGetPostDetail = async (
     const postID = req.params.postID;
 
     try {
-        const response = await getPostDetail(postID);
+        const response = await getPostDetail(postID, req.user ? req.user.id : undefined);
 
         res.status(200).json(response);
     } catch (error) {

@@ -66,13 +66,17 @@ export const getPostsMine = async (
     };
 };
 
-export const getPostDetail = async (postID: string): Promise<GetPostDetailResponseDTO> => {
+export const getPostDetail = async (postID: string, userID?: string): Promise<GetPostDetailResponseDTO> => {
     const post = await PostModel.findById(postID)
-        .populate<PopulatePost>('user', 'username');
+        .populate<PopulatePost>('user', 'username isPublic');
 
     if (!post) {
         throw new AppError(404, 'Post not found');
     };
+
+    if (!post.user.isPublic && (!userID || userID !== post.user._id.toString())) {
+        throw new AppError(403, 'Unauthorized');
+    }
 
     const comments = await CommentModel.find({ post: post.id })
         .populate('user', 'username')

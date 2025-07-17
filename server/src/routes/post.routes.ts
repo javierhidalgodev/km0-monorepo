@@ -31,7 +31,7 @@ postRoutes.get(
 
 postRoutes.get(
     '/posts/:postID',
-    authenticateToken(),
+    parseToken(),
     validateObjectID('postID'),
     handleGetPostDetail,
 );
