@@ -57,6 +57,7 @@ describe('GET /api/:username', () => {
         expect(profile.statusCode).toBe(200);
         expect(profile.body.status).toBe('ok');
         expect(profile.body.profile.email).toBe('demo@mail.com');
+        expect(profile.body.profile).not.toHaveProperty('bio');
     });
 
     it('Perfil PÚBLICO recuperado por usuario NO LOGGEADO', async () => {
