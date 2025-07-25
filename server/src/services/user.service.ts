@@ -63,11 +63,22 @@ export const loginUser = async (data: LoginRequestDTO): Promise<LoginResponseDTO
     };
 }
 
-export const getProfile = async (userID: string): Promise<ProfileResponseDTO> => {
-    const userProfile = await UserModel.findById(userID).lean();
+export const getProfile = async (username: string, userID?: string): Promise<ProfileResponseDTO> => {
+    const userProfile = await UserModel.findOne({ username }).lean();
 
     if (!userProfile) {
-        throw new AppError(404, 'Usuario no encontrado');
+        throw new AppError(404, 'User not found');
+    }
+
+    // Si el perfil es privado
+    // Si además el id del solicitante no es igual al del perfil solicitado
+    if (!userProfile.isPublic && userID != userProfile._id.toString()) {
+        return {
+            status: 'ok',
+            profile: {
+                username: userProfile.username,
+            }
+        }
     }
 
     return {
@@ -76,6 +87,7 @@ export const getProfile = async (userID: string): Promise<ProfileResponseDTO> =>
             username: userProfile.username,
             email: userProfile.email,
             birthdate: userProfile.birthdate,
+            bio: userProfile.bio,
         }
     }
 }

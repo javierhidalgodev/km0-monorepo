@@ -5,6 +5,7 @@ export interface IUser extends Document {
     email: string;
     password: string;
     birthdate: string;
+    bio: string;
     isPublic: boolean;
 };
 
@@ -29,6 +30,11 @@ const UserSchema = new Schema<IUser>({
     birthdate: {
         type: String,
         required: true,
+    },
+    bio: {
+        type: String,
+        maxlength: 400,
+        trim: true
     },
     isPublic: {
         type: Schema.Types.Boolean,

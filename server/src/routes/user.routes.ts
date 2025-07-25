@@ -3,6 +3,7 @@ import { handleGetProfile, handleUserCreation, handleUserLogin } from '@/control
 import { validate } from '@/middlewares/validate';
 import { createUserSchema, loginSchema } from '@/schemas/user.schema';
 import { authenticateToken } from '@/middlewares/authenticate-token';
+import { parseToken } from '@/middlewares/parse-token';
 
 const userRoutes = Router();
 
@@ -19,8 +20,8 @@ userRoutes.post(
 );
 
 userRoutes.get(
-    '/profile',
-    authenticateToken(),
+    '/:username',
+    parseToken(),
     handleGetProfile
 );
 

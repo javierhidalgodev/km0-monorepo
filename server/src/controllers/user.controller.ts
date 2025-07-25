@@ -10,9 +10,9 @@ export const handleUserCreation = async (
     res: Response<CreateUserResponseDTO>,
     next: NextFunction) => {
     try {
-        const { username, email, password, birthdate, isPublic }: CreateUserRequestDTO = req.body;
+        const { username, email, password, birthdate, bio, isPublic }: CreateUserRequestDTO = req.body;
 
-        const response = await createUser({ username, password, email, birthdate, isPublic });
+        const response = await createUser({ username, password, email, birthdate, bio, isPublic });
 
         res.status(201).json(response);
     } catch (error) {
@@ -40,14 +40,14 @@ export const handleGetProfile = async (
     next: NextFunction,
 ) => {
     const token = req.user;
+    const username = req.params.username;
 
-    // Defensivo
-    if (!token) {
-        throw new AppError(401, 'No hay token o está caducado');
-    };
+    if(!username) {
+        throw new AppError(400, 'Bad request');
+    }
 
     try {
-        const response = await getProfile(token.id);
+        const response = await getProfile(username, token ? token.id : undefined);
 
         res.status(200).json(response);
     } catch (error) {

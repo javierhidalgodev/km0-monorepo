@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 import request from 'supertest';
 import app from '@/app';
-import { IUser, UserModel } from '@/models/user.model';
-import { createUser } from '@/services/user.service';
-import { generateToken } from '@/utils/auth';
+import { UserModel } from '@/models/user.model';
+import { createUser, loginUser } from '@/services/user.service';
+import { LoginResponseDTO } from '@/dtos/login-user.dto';
 
 const MONGO_DB_URI = process.env.MONGO_DB_URI || 'mongodb://localhost:27017/km0-test'
 
@@ -47,7 +47,7 @@ describe('POST /api/users', () => {
             email: 'demo@mail.com',
             birthdate: '1990-01-01',
             password: '123456',
-        }) ;
+        });
 
         const result = await request(app)
             .post('/api/users')
@@ -64,7 +64,7 @@ describe('POST /api/users', () => {
 });
 
 describe('POST /api/login', () => {
-    beforeEach(async() => {
+    beforeEach(async () => {
         await createUser({
             username: 'demo_user',
             email: 'demo@mail.com',
@@ -111,17 +111,26 @@ describe('POST /api/login', () => {
     });
 })
 
-describe('POST /api/profile', () => {
-    beforeEach(async() => {
+describe('GET /api/:username', () => {
+    beforeEach(async () => {
         await createUser({
             username: 'demo_user',
             email: 'demo@mail.com',
             birthdate: '1990-01-01',
             password: '123456',
+            isPublic: false,
+        })
+
+        await createUser({
+            username: 'demo_user_2',
+            email: 'demo_2@mail.com',
+            birthdate: '1990-01-01',
+            password: '123456',
+            bio: 'La bio de este tío',
         })
     })
 
-    it('Con un token correcto, se obtiene el perfil', async () => {
+    it('Dueño de perfil privado obtiene todos los datos', async () => {
         const result = await request(app)
             .post('/api/login')
             .send({
@@ -130,7 +139,7 @@ describe('POST /api/profile', () => {
             });
 
         const profile = await request(app)
-            .get('/api/profile')
+            .get('/api/demo_user')
             .auth(result.body.token, { type: 'bearer' });
 
         expect(profile.statusCode).toBe(200);
@@ -138,37 +147,94 @@ describe('POST /api/profile', () => {
         expect(profile.body.profile.email).toBe('demo@mail.com');
     });
 
-    it('Sin token devuelve AppError', async () => {
+    it('Perfil PÚBLICO recuperado por usuario NO LOGGEADO', async () => {
         const profile = await request(app)
-            .get('/api/profile');
+            .get('/api/demo_user_2');
 
-        expect(profile.statusCode).toBe(401);
-        expect(profile.body.message).toBe('Invalid token');
+        expect(profile.statusCode).toBe(200);
+        expect(profile.body.status).toBe('ok');
+        expect(profile.body.profile.email).toBe('demo_2@mail.com');
+        expect(profile.body.profile).toHaveProperty('bio');
+        expect(profile.body.profile.bio).toBe('La bio de este tío');
     });
 
-    it('Token inválido o caducado devuelve AppError', async () => {
-        const profile = await request(app)
-            .get('/api/profile')
-            .auth('123asd', { type: 'bearer' });
+    it('Perfil PÚBLICO recuperado por usuario LOGGEADO', async () => {
+        const result = await request(app)
+            .post('/api/login')
+            .send({
+                email: 'demo@mail.com',
+                password: '123456',
+            });
 
-        expect(profile.statusCode).toBe(401);
-        expect(profile.body.message).toBe('Token inválido o caducado');
+        const profile = await request(app)
+            .get('/api/demo_user_2')
+            .auth(result.body.token, { type: 'bearer' });
+
+        expect(profile.statusCode).toBe(200);
+        expect(profile.body.status).toBe('ok');
+        expect(profile.body.profile.email).toBe('demo_2@mail.com');
+        expect(profile.body.profile).toHaveProperty('email');
+        expect(profile.body.profile).toHaveProperty('birthdate');
+        expect(profile.body.profile).toHaveProperty('bio');
+        expect(profile.body.profile.bio).toBe('La bio de este tío');
     });
 
-    it('Token válido, pero usuario inexistente', async () => {
-        const token = generateToken({
-            _id: '63ff68f7b3c5a84f68abc01',
-            email: 'ghost@mail.com',
-            username: 'ghost',
-            password: 'ghost_pass',
-            birthdate: '2020-02-02',
-        } as IUser)
+    it('Perfil PRIVADO recuperado parcialmente por usuario NO LOGGEADO', async () => {
+        const profile = await request(app)
+            .get('/api/demo_user');
+
+        expect(profile.statusCode).toBe(200);
+        expect(profile.body.status).toBe('ok');
+        expect(profile.body.profile.username).toBe('demo_user');
+        expect(profile.body.profile).not.toHaveProperty('email');
+        expect(profile.body.profile).not.toHaveProperty('birthdate');
+    });
+
+    it('Perfil PRIVADO recuperado parcialmente por usuario LOGGEADO', async () => {
+        const result = await request(app)
+            .post('/api/login')
+            .send({
+                email: 'demo_2@mail.com',
+                password: '123456',
+            });
 
         const profile = await request(app)
-            .get('/api/profile')
-            .auth(token, { type: 'bearer' });
+            .get('/api/demo_user')
+            .auth(result.body.token, { type: 'bearer' });
 
-        expect(profile.statusCode).toBe(404);
-        expect(profile.body.message).toBe('Usuario no encontrado');
+        expect(profile.statusCode).toBe(200);
+        expect(profile.body.status).toBe('ok');
+        expect(profile.body.profile).toHaveProperty('username');
+        expect(profile.body.profile.username).toBe('demo_user');
+        expect(profile.body.profile).not.toHaveProperty('email');
+        expect(profile.body.profile).not.toHaveProperty('birthdate');
     });
 })
+
+describe('INVALID GET /api/:username', () => {
+    let login: LoginResponseDTO;
+
+    beforeEach(async () => {
+        await createUser({
+            username: 'demo_user',
+            email: 'demo@mail.com',
+            birthdate: '1990-01-01',
+            password: '123456',
+            isPublic: false,
+        })
+
+        login = await loginUser({
+            email: 'demo@mail.com',
+            password: '123456',
+        })
+    })
+
+    it('Error 404 en usuario no encontrado', async () => {
+        const profile = await request(app)
+            .get('/api/demo_user_fake')
+            .auth(login.token, { type: 'bearer' });
+
+        expect(profile.statusCode).toBe(404);
+        expect(profile.body.message).toBe('User not found');
+    });
+});
