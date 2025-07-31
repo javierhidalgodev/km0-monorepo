@@ -147,12 +147,11 @@ describe('POST /api/posts', () => {
 });
 
 describe('VALID GET /api/posts', () => {
-    it('Se recuperan correctamente todos los posts sin filtros', async () => {
-        await createVariousPosts(token);
+    it('Usuario ANÓNIMO recupera todos los posts PÚBLICOS sin filtros', async () => {
+        await createVariousPosts(token2);
 
         const result = await request(app)
-            .get('/api/posts')
-            .auth(token, { type: 'bearer' });
+            .get('/api/posts');
 
         expect(result.statusCode).toBe(200);
         expect(result.body.status).toBe('ok');
