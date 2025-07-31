@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { handleGetProfile, handleUserCreation, handleUserLogin } from '@/controllers/user.controller';
-import { validate } from '@/middlewares/validate';
-import { createUserSchema, loginSchema } from '@/schemas/user.schema';
+import { handleGetProfile, handlePatchProfile, handleUserCreation, handleUserLogin } from '@/controllers/user.controller';
+import { validate, validateBody } from '@/middlewares/validate';
+import { createUserSchema, loginSchema, patchProfileSchema } from '@/schemas/user.schema';
 import { authenticateToken } from '@/middlewares/authenticate-token';
 import { parseToken } from '@/middlewares/parse-token';
 
@@ -10,19 +10,26 @@ const userRoutes = Router();
 userRoutes.post(
     '/users',
     validate(createUserSchema, 'body'),
-    handleUserCreation
+    handleUserCreation,
 );
 
 userRoutes.post(
     '/login',
     validate(loginSchema, 'body'),
-    handleUserLogin
+    handleUserLogin,
 );
 
 userRoutes.get(
     '/:username',
     parseToken(),
-    handleGetProfile
+    handleGetProfile,
 );
+
+userRoutes.patch(
+    '/profile',
+    authenticateToken(),
+    validateBody(patchProfileSchema),
+    handlePatchProfile,
+)
 
 export default userRoutes;

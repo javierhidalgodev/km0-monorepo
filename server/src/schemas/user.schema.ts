@@ -16,3 +16,18 @@ export const loginSchema = z.object({
     email: z.string().email(),
     password: z.string(),
 });
+
+// export const patchProfileSchema = z.object({
+//     birthdate: z.string().refine(dateStr => {
+//         const age = new Date().getFullYear() - new Date(dateStr).getFullYear();
+//         return age > 18;
+//     }, { message: 'Debe ser mayor de edad' }),
+//     bio: z.string().max(400, { message: 'La bio no puede superar los 400 caracteres' }).optional(),
+//     isPublic: z.boolean().optional(),
+// })
+
+export const patchProfileSchema = createUserSchema.omit({
+    username: true,
+    password: true,
+    email: true,
+}).partial();

@@ -120,3 +120,66 @@ describe('INVALID GET /api/:username', () => {
         expect(profile.body.message).toBe('User not found');
     });
 });
+
+describe('PATCH /api/profile', () => {
+    it('Actualización correcta del perfil, y visualización de data desde usuario anónimo', async () => {
+        const response = await request(app)
+            .patch('/api/profile')
+            .send({
+                bio: 'Modificando desde TEST',
+                isPublic: true,
+            })
+            .auth(token1.token, { type: 'bearer' });
+
+        const getProfile = await request(app)
+            .get('/api/demo_user');
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body.status).toBe('updated');
+        expect(response.body.user.bio).toBe('Modificando desde TEST');
+        expect(getProfile.body.profile).toHaveProperty('bio');
+    });
+
+    it('Correcta visualización de data recortada desde usuario anónimo al cambiar a perfil privado', async () => {
+        const response = await request(app)
+            .patch('/api/profile')
+            .send({
+                isPublic: false,
+            })
+            .auth(token2.token, { type: 'bearer' });
+
+        const getProfile = await request(app)
+            .get('/api/demo_user_2');
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body.status).toBe('updated');
+        expect(getProfile.body.profile).not.toHaveProperty('bio');
+    });
+});
+
+describe('INVALID PATCH /api/profile', () => {
+    it('Error 401 al intentar modificar perfil sin autenticación', async () => {
+        const response = await request(app)
+            .patch('/api/profile')
+            .send({
+                bio: 'Modificando desde TEST',
+                isPublic: true,
+            });
+
+        expect(response.statusCode).toBe(401);
+        expect(response.body.message).toBe('Invalid token');
+    });
+
+    it('Error 400 al intentar modificar perfil con campos inválidos', async () => {
+        const response = await request(app)
+            .patch('/api/profile')
+            .send({
+                bios: 'Modificando desde TEST',
+                isPublic: true,
+            })
+            .auth(token1.token, { type: 'bearer' });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.message).toBe('Error de validación');
+    });
+});
