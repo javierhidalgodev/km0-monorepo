@@ -108,4 +108,4 @@ describe('POST /api/login', () => {
         expect(result.statusCode).toBe(401);
         expect(result.body.message).toEqual('Credenciales incorrectas');
     });
-})
+});
