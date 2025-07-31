@@ -5,6 +5,7 @@
 
 import { CreateUserRequestDTO, CreateUserResponseDTO } from '@/dtos/create-user.dto';
 import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/login-user.dto';
+import { PatchProfileRequestDTO, PatchProfileResponseDTO } from '@/dtos/patch-profile.dto';
 import { ProfileResponseDTO } from '@/dtos/profile.dto';
 import { UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
@@ -18,7 +19,7 @@ export const createUser = async (data: CreateUserRequestDTO): Promise<CreateUser
 
     if (exists) {
         throw new AppError(409, 'Email ya registrado');
-    }
+    };
 
     const hashedPassword = await hashPassword(password);
 
@@ -34,21 +35,21 @@ export const createUser = async (data: CreateUserRequestDTO): Promise<CreateUser
             email: user.email,
             birthdate: user.birthdate,
         },
-    }
-}
+    };
+};
 
 export const loginUser = async (data: LoginRequestDTO): Promise<LoginResponseDTO> => {
     const user = await UserModel.findOne({ email: data.email });
 
     if (!user) {
         throw new AppError(401, 'Credenciales incorrectas');
-    }
+    };
 
     const isValid = await comparePassword(data.password, user.password);
 
     if (!isValid) {
         throw new AppError(401, 'Credenciales incorrectas');
-    }
+    };
 
     const token = generateToken(user);
 
@@ -61,14 +62,14 @@ export const loginUser = async (data: LoginRequestDTO): Promise<LoginResponseDTO
             email: user.email,
         },
     };
-}
+};
 
 export const getProfile = async (username: string, userID?: string): Promise<ProfileResponseDTO> => {
     const userProfile = await UserModel.findOne({ username }).lean();
 
     if (!userProfile) {
         throw new AppError(404, 'User not found');
-    }
+    };
 
     // Si el perfil es privado
     // Si además el id del solicitante no es igual al del perfil solicitado
@@ -78,8 +79,8 @@ export const getProfile = async (username: string, userID?: string): Promise<Pro
             profile: {
                 username: userProfile.username,
             }
-        }
-    }
+        };
+    };
 
     return {
         status: 'ok',
@@ -89,5 +90,29 @@ export const getProfile = async (username: string, userID?: string): Promise<Pro
             birthdate: userProfile.birthdate,
             bio: userProfile.bio,
         }
+    };
+};
+
+export const patchProfile = async (userID: string, data: PatchProfileRequestDTO): Promise<PatchProfileResponseDTO> => {
+    const updatedProfile = await UserModel.findByIdAndUpdate(userID, {
+        birthdate: data.birthdate,
+        bio: data.bio,
+        isPublic: data.isPublic,
+    }, {
+        new: true,
+    });
+
+    if(!updatedProfile) {
+        throw new AppError(404, 'User not found');
     }
-}
+
+    return {
+        status: 'updated',
+        user: {
+            username: updatedProfile.username,
+            email: updatedProfile.email,
+            birthdate: updatedProfile.birthdate,
+            bio: updatedProfile.bio,
+        }
+    }
+};

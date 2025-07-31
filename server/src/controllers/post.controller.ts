@@ -5,7 +5,6 @@ import { CreatePostResponseDTO } from '@/dtos/create-post.dto';
 import { GetPostsResponseDTO } from '@/dtos/get-post.dto';
 import { DeletePostResponseDTO } from '@/dtos/delete-post.dto';
 import { GetPostDetailResponseDTO } from '@/dtos/get-post-detail.dto';
-import { verifyToken } from '@/utils/auth';
 
 export const handlePostCreation = async (
     req: Request,

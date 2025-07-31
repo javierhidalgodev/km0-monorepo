@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { createUser, getProfile, loginUser } from '@/services/user.service';
+import { createUser, getProfile, loginUser, patchProfile } from '@/services/user.service';
 import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/login-user.dto';
 import { CreateUserRequestDTO, CreateUserResponseDTO } from '@/dtos/create-user.dto';
 import { AppError } from '@/utils/app-error';
 import { ProfileResponseDTO } from '@/dtos/profile.dto';
+import { PatchProfileRequestDTO, PatchProfileResponseDTO } from '@/dtos/patch-profile.dto';
 
 export const handleUserCreation = async (
     req: Request,
@@ -42,7 +43,7 @@ export const handleGetProfile = async (
     const token = req.user;
     const username = req.params.username;
 
-    if(!username) {
+    if (!username) {
         throw new AppError(400, 'Bad request');
     }
 
@@ -52,5 +53,21 @@ export const handleGetProfile = async (
         res.status(200).json(response);
     } catch (error) {
         next(error);
+    };
+};
+
+export const handlePatchProfile = async (
+    req: Request,
+    res: Response<PatchProfileResponseDTO>,
+    next: NextFunction
+) => {
+    try {
+        const { bio, birthdate, isPublic }: PatchProfileRequestDTO = req.body;
+
+        const response = await patchProfile(req.user!.id, { bio, birthdate, isPublic });
+
+        res.status(200).json(response);
+    } catch (error) {
+        return next(error);
     };
 };

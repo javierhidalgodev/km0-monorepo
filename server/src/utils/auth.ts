@@ -48,8 +48,14 @@ export const verifyToken = (token: string) => {
     }
 }
 
+/**
+ * 
+ * @param authHeader Token string para poder identificar la petición de un usuario loggeado
+ * @param required Por defecto false. Indica si el token es requerido o no para lanzar un error
+ * @returns Si no existe la cabecera de auth, se devuelve undefined. Si existe, se verifica el token y se devuelve el payload.
+ */
 export const extractUserFromAuthHeader = (authHeader?: string, required = false): TokenPayload | undefined => {
-    if(!authHeader) {
+    if (!authHeader) {
         if (required) throw new AppError(401, 'Invalid token');
         return;
     }

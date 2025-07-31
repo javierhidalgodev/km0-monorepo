@@ -8,6 +8,7 @@ export const authenticateToken =
 
             try {
                 req.user = extractUserFromAuthHeader(token, true);
+
                 next();
             } catch (error) {
                 next(error);
