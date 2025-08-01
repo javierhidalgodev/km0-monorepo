@@ -86,7 +86,7 @@ beforeEach(async () => {
     await mongoose.connection.dropCollection('comments');
 });
 
-describe.only('VALID POST /api/posts/:postID/comments', () => {
+describe('VALID POST /api/posts/:postID/comments', () => {
     it('POST PÚBLICO --> Cualquier usuario loggeado puede comentar', async () => {
         const resultWithToken1 = await request(app)
             .post(`/api/posts/${publicPostID}/comments`)
@@ -126,101 +126,87 @@ describe.only('VALID POST /api/posts/:postID/comments', () => {
         expect(result.body.comment.post).toBe(privatePostID);
         expect(result.body.comment.content).toBe('Menuda carrera papá!');
     });
-
-    // it('Error de validación de campo no aceptado, 400 + \'Error de validación\'', async () => {
-    //     const result = await request(app)
-    //         .post(`/api/posts/${privatePostID}/comments`)
-    //         .send({
-    //             contet: 'Menuda carrera papá!',
-    //         })
-    //         .auth(token1, { type: 'bearer' });
-
-    //     expect(result.statusCode).toBe(400);
-    //     expect(result.body.status).toBe('error');
-    //     expect(result.body.message).toBe('Error de validación');
-    //     expect(result.body.details._errors[0]).toContain('Unrecognized key(s) in object: \'contet\'');
-    // });
-
-    // Válido también para caracteres en blanco '                '
-    // it('Error de mínimo de caracteres, 400 + \'Error de validación\'', async () => {
-    //     const result = await request(app)
-    //         .post(`/api/posts/${privatePostID}/comments`)
-    //         .send({
-    //             content: '',
-    //         })
-    //         .auth(token1, { type: 'bearer' });
-
-    //     expect(result.statusCode).toBe(400);
-    //     expect(result.body.status).toBe('error');
-    //     expect(result.body.message).toBe('Error de validación');
-    //     expect(result.body.details.content._errors[0]).toContain('El comentario no puede estar vacío');
-    // });
-
-    // it('Error de máximo de caracteres, 400 + \'Error de validación\'', async () => {
-    //     const result = await request(app)
-    //         .post(`/api/posts/${privatePostID}/comments`)
-    //         .send({
-    //             content: 'Esta herramienta online se utiliza para contar caracteres de un texto y cantidad de palabras, calcula también la densidad de palabras claves quitando las stop words. Esta herramienta online se utiliza para contar caracteres de un texto y cantidad de palabras, calcula también la densidad de palabras. +',
-    //         })
-    //         .auth(token1, { type: 'bearer' });
-
-    //     expect(result.statusCode).toBe(400);
-    //     expect(result.body.status).toBe('error');
-    //     expect(result.body.message).toBe('Error de validación');
-    //     expect(result.body.details.content._errors[0]).toContain('El comentario no puede contener más de 300 caracteres');
-    // });
 });
 
-describe.only('INVALOID POST /api/posts/:postID/comments', () => {
-    // Un post PÚBLICO/PRIVADO no puede ser comentado por un usuario no loggeado
-    
-    // Un POST PRIVADO no puede ser comentado por usuario distinto del creador
+describe('INVALID POST /api/posts/:postID/comments', () => {
+    it('Un post PÚBLICO/PRIVADO no puede ser comentado por un usuario no loggeado', async () => {
+        const resultWithToken1 = await request(app)
+            .post(`/api/posts/${publicPostID}/comments`)
+            .send({
+                content: 'Menuda carrera papá!',
+            });
 
-    // it('Error de validación de campo no aceptado, 400 + \'Error de validación\'', async () => {
-    //     const result = await request(app)
-    //         .post(`/api/posts/${privatePostID}/comments`)
-    //         .send({
-    //             contet: 'Menuda carrera papá!',
-    //         })
-    //         .auth(token1, { type: 'bearer' });
+        const resultWithToken2 = await request(app)
+            .post(`/api/posts/${privatePostID}/comments`)
+            .send({
+                content: 'Menuda carrera papá!',
+            });
 
-    //     expect(result.statusCode).toBe(400);
-    //     expect(result.body.status).toBe('error');
-    //     expect(result.body.message).toBe('Error de validación');
-    //     expect(result.body.details._errors[0]).toContain('Unrecognized key(s) in object: \'contet\'');
-    // });
+        expect(resultWithToken1.statusCode).toBe(401);
+        expect(resultWithToken1.body.status).toBe('error');
+        expect(resultWithToken1.body.message).toBe('Invalid token');
+        expect(resultWithToken2.statusCode).toBe(401);
+        expect(resultWithToken2.body.status).toBe('error');
+        expect(resultWithToken2.body.message).toBe('Invalid token');
+    });
 
-    // Válido también para caracteres en blanco '                '
-    // it('Error de mínimo de caracteres, 400 + \'Error de validación\'', async () => {
-    //     const result = await request(app)
-    //         .post(`/api/posts/${privatePostID}/comments`)
-    //         .send({
-    //             content: '',
-    //         })
-    //         .auth(token1, { type: 'bearer' });
+    it('Un POST PRIVADO no puede ser comentado por usuario distinto del creador', async () => {
+        const result = await request(app)
+            .post(`/api/posts/${privatePostID}/comments`)
+            .send({
+                content: 'Menuda carrera papá!',
+            })
+            .auth(token2, { type: 'bearer' });
 
-    //     expect(result.statusCode).toBe(400);
-    //     expect(result.body.status).toBe('error');
-    //     expect(result.body.message).toBe('Error de validación');
-    //     expect(result.body.details.content._errors[0]).toContain('El comentario no puede estar vacío');
-    // });
+        expect(result.statusCode).toBe(403);
+        expect(result.body.status).toBe('error');
+        expect(result.body.message).toBe('Forbidden');
+    });
 
-    // it('Error de máximo de caracteres, 400 + \'Error de validación\'', async () => {
-    //     const result = await request(app)
-    //         .post(`/api/posts/${privatePostID}/comments`)
-    //         .send({
-    //             content: 'Esta herramienta online se utiliza para contar caracteres de un texto y cantidad de palabras, calcula también la densidad de palabras claves quitando las stop words. Esta herramienta online se utiliza para contar caracteres de un texto y cantidad de palabras, calcula también la densidad de palabras. +',
-    //         })
-    //         .auth(token1, { type: 'bearer' });
+    it('Error de validación de campo no aceptado, 400 + \'Error de validación\'', async () => {
+        const result = await request(app)
+            .post(`/api/posts/${privatePostID}/comments`)
+            .send({
+                contet: 'Menuda carrera papá!',
+            })
+            .auth(token1, { type: 'bearer' });
 
-    //     expect(result.statusCode).toBe(400);
-    //     expect(result.body.status).toBe('error');
-    //     expect(result.body.message).toBe('Error de validación');
-    //     expect(result.body.details.content._errors[0]).toContain('El comentario no puede contener más de 300 caracteres');
-    // });
+        expect(result.statusCode).toBe(400);
+        expect(result.body.status).toBe('error');
+        expect(result.body.message).toBe('Error de validación');
+        expect(result.body.details._errors[0]).toContain('Unrecognized key(s) in object: \'contet\'');
+    });
+
+    it('Error de mínimo de caracteres para campos con espacios en blanco, 400 + \'Error de validación\'', async () => {
+        const result = await request(app)
+            .post(`/api/posts/${publicPostID}/comments`)
+            .send({
+                content: '',
+            })
+            .auth(token1, { type: 'bearer' });
+
+        expect(result.statusCode).toBe(400);
+        expect(result.body.status).toBe('error');
+        expect(result.body.message).toBe('Error de validación');
+        expect(result.body.details.content._errors[0]).toContain('El comentario no puede estar vacío');
+    });
+
+    it('Error de máximo de caracteres superado, 400 + \'Error de validación\'', async () => {
+        const result = await request(app)
+            .post(`/api/posts/${privatePostID}/comments`)
+            .send({
+                content: 'Esta herramienta online se utiliza para contar caracteres de un texto y cantidad de palabras, calcula también la densidad de palabras claves quitando las stop words. Esta herramienta online se utiliza para contar caracteres de un texto y cantidad de palabras, calcula también la densidad de palabras. +',
+            })
+            .auth(token1, { type: 'bearer' });
+
+        expect(result.statusCode).toBe(400);
+        expect(result.body.status).toBe('error');
+        expect(result.body.message).toBe('Error de validación');
+        expect(result.body.details.content._errors[0]).toContain('El comentario no puede contener más de 300 caracteres');
+    });
 });
 
-describe('GET /api/posts/:postID/comments', () => {
+describe('VALID GET /api/posts/:postID/comments', () => {
     it('Se recuperan exitósamente los comentarios', async () => {
         await createComment(token1, privatePostID);
 
@@ -232,7 +218,9 @@ describe('GET /api/posts/:postID/comments', () => {
         expect(response.body.status).toBe('ok');
         expect(response.body.comments).toHaveLength(1);
     });
+});
 
+describe('INVALID GET /api/posts/:postID/comments', () => {
     it('Si el post no existe => 404 + \'Post not found\'', async () => {
         const fakeObjectID = generateObjectId();
 
@@ -256,7 +244,7 @@ describe('GET /api/posts/:postID/comments', () => {
     });
 });
 
-describe('DELETE /api/comments/:commentID', () => {
+describe('VALID DELETE /api/comments/:commentID', () => {
     it('Comentario borrado existosamente', async () => {
         const comment = await createComment(token1, privatePostID);
         commentID = comment.body.comment.id
@@ -269,7 +257,9 @@ describe('DELETE /api/comments/:commentID', () => {
         expect(response.body.status).toBe('deleted');
         expect(response.body.message).toBe('Comment deleted succesfully');
     });
+});
 
+describe('INVALID DELETE /api/comments/:commentID', () => {
     it('No encuentra el comentario que se quiere borrar', async () => {
         const response = await request(app)
             .delete(`/api/comments/${generateObjectId()}`)
