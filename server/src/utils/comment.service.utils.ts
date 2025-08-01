@@ -1,5 +1,7 @@
 import { GetCommentResponseDTO } from '@/dtos/get-comments.dto';
 import { PopulateComment } from '@/models/comment.model';
+import { PopulatePost, PostModel } from '@/models/post.model';
+import { AppError } from './app-error';
 
 export const mapComments = (comments: PopulateComment[]): GetCommentResponseDTO[] => {
     return comments.map<GetCommentResponseDTO>((c: PopulateComment) => {
@@ -15,3 +17,18 @@ export const mapComments = (comments: PopulateComment[]): GetCommentResponseDTO[
         });
     });
 };
+
+export const assertCanComment = async (postID: string, userID: string): Promise<void> => {
+    const post = await PostModel
+        .findById(postID)
+        .populate('user', 'isPublic')
+        .lean<PopulatePost>();
+
+    if (!post) {
+        throw new AppError(404, 'Post not found');
+    }
+
+    if (!post.user.isPublic && post.user._id.toString() !== userID) {
+        throw new AppError(403, 'Forbidden');
+    }
+}
