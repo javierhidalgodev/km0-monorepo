@@ -10,6 +10,8 @@ export const createUserSchema = z.object({
     }, { message: 'Debe ser mayor de edad' }),
     bio: z.string().max(400, { message: 'La bio no puede superar los 400 caracteres' }).optional(),
     isPublic: z.boolean().optional(),
+    followers: z.array(z.string()).optional(),
+    followRequests: z.array(z.string()).optional(),
 }).strict();
 
 export const loginSchema = z.object({
