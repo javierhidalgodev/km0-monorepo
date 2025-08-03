@@ -89,6 +89,7 @@ export const getProfile = async (username: string, userID?: string): Promise<Pro
             email: userProfile.email,
             birthdate: userProfile.birthdate,
             bio: userProfile.bio,
+            followers: userProfile.followers.length,
         }
     };
 };
