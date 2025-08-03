@@ -1,39 +1,18 @@
-import { FollowRequestResponseDTO } from "@/dtos/follow.dto";
-import { UserModel } from "@/models/user.model"
-import { AppError } from "@/utils/app-error";
+import { FollowRequestResponseDTO } from '@/dtos/follow.dto';
+import { AppError } from '@/utils/app-error';
+import { followPublicUser, requestToFollowPrivateUser } from '@/utils/follow.service.utils';
+import { findUserByUsername } from '@/utils/user.service.utils';
 
 export const followRequest = async (username: string, requestingUserID: string): Promise<FollowRequestResponseDTO> => {
-	const userToFollow = await UserModel.findOne({ username });
+	const userToFollow = await findUserByUsername(username);
 
-	if (!userToFollow) {
-		throw new AppError(404, 'User not found');
+	if (userToFollow.id === requestingUserID) {
+		throw new AppError(400, 'Cannot follow yourself');
 	};
 
 	if (!userToFollow.isPublic) {
-		if (userToFollow.followRequests.includes(requestingUserID)) {
-			throw new AppError(400, 'Already requested');
-		};
-
-		await userToFollow.updateOne({
-			$addToSet: { followRequests: requestingUserID },
-		});
-
-		return {
-			status: 'pending',
-			message: 'Wait for user response',
-		};
+		return requestToFollowPrivateUser(userToFollow, requestingUserID);
 	};
 
-	if (userToFollow.followers.includes(requestingUserID)) {
-		throw new AppError(400, 'Already following');
-	};
-
-	await userToFollow.updateOne({
-		$addToSet: { followers: requestingUserID },
-	});
-
-	return {
-		status: 'followed',
-		message: `Following ${username}`,
-	};
-}	
+	return followPublicUser(userToFollow, requestingUserID);
+};
