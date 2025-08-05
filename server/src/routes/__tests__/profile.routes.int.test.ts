@@ -48,7 +48,7 @@ afterAll(async () => {
 //     await mongoose.connection.dropCollection('users')
 // })
 
-describe('GET /api/:username', () => {
+describe.only('GET /api/:username', () => {
     it('Dueño de perfil privado obtiene todos los datos', async () => {
         const profile = await request(app)
             .get('/api/demo_user')
@@ -56,6 +56,9 @@ describe('GET /api/:username', () => {
 
         expect(profile.statusCode).toBe(200);
         expect(profile.body.status).toBe('ok');
+        expect(profile.body.profile).toHaveProperty('followers');
+        expect(profile.body.profile).toHaveProperty('following');
+        expect(profile.body.profile).toHaveProperty('followRequests');
         expect(profile.body.profile.email).toBe('demo@mail.com');
         expect(profile.body.profile).not.toHaveProperty('bio');
     });
@@ -69,6 +72,9 @@ describe('GET /api/:username', () => {
         expect(profile.body.profile.email).toBe('demo_2@mail.com');
         expect(profile.body.profile).toHaveProperty('bio');
         expect(profile.body.profile.bio).toBe('La bio de este tío');
+        expect(profile.body.profile).toHaveProperty('followers');
+        expect(profile.body.profile).toHaveProperty('following');
+        expect(profile.body.profile).not.toHaveProperty('followRequests');
     });
 
     it('Perfil PÚBLICO recuperado por usuario LOGGEADO', async () => {
@@ -82,7 +88,11 @@ describe('GET /api/:username', () => {
         expect(profile.body.profile).toHaveProperty('email');
         expect(profile.body.profile).toHaveProperty('birthdate');
         expect(profile.body.profile).toHaveProperty('bio');
+        expect(profile.body.profile).toHaveProperty('followers');
+        expect(profile.body.profile).toHaveProperty('following');
+        expect(profile.body.profile).not.toHaveProperty('followRequests');
         expect(profile.body.profile.bio).toBe('La bio de este tío');
+        
     });
 
     it('Perfil PRIVADO recuperado parcialmente por usuario NO LOGGEADO', async () => {
@@ -94,6 +104,9 @@ describe('GET /api/:username', () => {
         expect(profile.body.profile.username).toBe('demo_user');
         expect(profile.body.profile).not.toHaveProperty('email');
         expect(profile.body.profile).not.toHaveProperty('birthdate');
+        expect(profile.body.profile).not.toHaveProperty('followers');
+        expect(profile.body.profile).not.toHaveProperty('following');
+        expect(profile.body.profile).not.toHaveProperty('followRequests');
     });
 
     it('Perfil PRIVADO recuperado parcialmente por usuario LOGGEADO', async () => {
@@ -107,6 +120,9 @@ describe('GET /api/:username', () => {
         expect(profile.body.profile.username).toBe('demo_user');
         expect(profile.body.profile).not.toHaveProperty('email');
         expect(profile.body.profile).not.toHaveProperty('birthdate');
+        expect(profile.body.profile).not.toHaveProperty('followers');
+        expect(profile.body.profile).not.toHaveProperty('following');
+        expect(profile.body.profile).not.toHaveProperty('followRequests');
     });
 })
 
