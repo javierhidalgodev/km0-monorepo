@@ -6,5 +6,7 @@ export interface ProfileResponseDTO {
         birthdate?: string;
         bio?: string;
         followers?: number;
+        following?: number;
+        followRequests?: string[];
     };
 };

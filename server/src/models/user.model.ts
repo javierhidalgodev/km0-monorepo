@@ -9,6 +9,7 @@ export interface IUser extends Document {
     isPublic: boolean;
     followers: string[];
     followRequests: string[];
+    following: string[];
 };
 
 const UserSchema = new Schema<IUser>({
@@ -46,13 +47,22 @@ const UserSchema = new Schema<IUser>({
     followers: [
         {
             type: Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'User',
+            default: [],
         }
     ],
     followRequests: [
         {
             type: Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'User',
+            default: [],
+        }
+    ],
+    following: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            default: [],
         }
     ],
 });

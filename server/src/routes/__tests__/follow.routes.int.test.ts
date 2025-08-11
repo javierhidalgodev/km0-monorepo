@@ -57,8 +57,7 @@ beforeEach(async () => {
     await UserModel.updateMany({}, { $set: { followers: [], followRequests: [] } });
 })
 
-// POST /api/follow/:username
-describe('VALID POST /api/follow/:username', () => {
+describe.only('VALID POST /api/follow/:username', () => {
     it('Cualquier tipo de usuario puede seguir directamente a un usuario público', async () => {
         const response = await request(app)
             .post('/api/follow/demo_user_2')
@@ -69,7 +68,6 @@ describe('VALID POST /api/follow/:username', () => {
         expect(response.body.message).toBe('Following demo_user_2');
     });
 
-    // 2. Cualquier tipo de usuario puede hacer petición de seguimiento a un usuario privado
     it('Cualquier tipo de usuario puede hacer petición de seguimiento a un usuario privado', async () => {
         const response = await request(app)
             .post('/api/follow/demo_user')
@@ -78,6 +76,32 @@ describe('VALID POST /api/follow/:username', () => {
         expect(response.status).toBe(200);
         expect(response.body.status).toBe('pending');
         expect(response.body.message).toBe('Wait for user response');
+    });
+
+    it.only('Cuando se sigue un perfil público, el perfil demandante y el demandado, reflejan los cambios', async () => {
+        await request(app)
+            .post('/api/follow/demo_user_2')
+            .auth(token, { type: 'bearer' });
+
+        const requestingUser = await request(app)
+            .get('/api/demo_user')
+            .auth(token, { type: 'bearer' });
+
+        const requestedUser = await request(app)
+            .get('/api/demo_user_2')
+            .auth(token2, { type: 'bearer' });
+
+        expect(requestingUser.status).toBe(200);
+        expect(requestingUser.body.profile).toHaveProperty('followers');
+        expect(requestingUser.body.profile).toHaveProperty('following');
+        expect(requestingUser.body.profile).toHaveProperty('followRequests');
+        expect(requestingUser.body.profile.following).toBe(1);
+
+        expect(requestedUser.status).toBe(200);
+        expect(requestedUser.body.profile).toHaveProperty('followers');
+        expect(requestedUser.body.profile).toHaveProperty('following');
+        expect(requestedUser.body.profile).toHaveProperty('followRequests');
+        expect(requestedUser.body.profile.followers).toBe(1);
     });
 });
 
@@ -123,7 +147,7 @@ describe('INVALID POST /api/follow/:username', () => {
         expect(response.body.message).toBe('Already following');
     });
     // 5. Ya existe una petición de seguimiento al usuario privado
-        it('Ya existe una petición de seguimiento al usuario privado', async () => {
+    it('Ya existe una petición de seguimiento al usuario privado', async () => {
         const response = await request(app)
             .post('/api/follow/demo_user')
             .auth(token2, { type: 'bearer' });
