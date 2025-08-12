@@ -3,8 +3,14 @@ import { IUser, UserModel } from '@/models/user.model';
 import { AppError } from './app-error';
 
 export const requestToFollowPrivateUser = async (userToFollow: IUser, requestingUserID: string): Promise<FollowRequestResponseDTO> => {
+	// Si tiene petición pendiente
 	if (userToFollow.followRequests.includes(requestingUserID)) {
-		throw new AppError(400, 'Already requested. Wait for user response');
+		throw new AppError(400, 'Follow request already pending');
+	};
+
+	// Si ya es seguidor
+	if (userToFollow.followers.includes(requestingUserID)) {
+		throw new AppError(400, 'Already following');
 	};
 
 	await userToFollow.updateOne({
@@ -21,7 +27,7 @@ export const followPublicUser = async (userToFollow: IUser, requestingUserID: st
 	const requestingUser = await UserModel.findById(requestingUserID)
 
 	// Raro, porque el token no pasaría desde el middleware
-	if(!requestingUser) {
+	if (!requestingUser) {
 		throw new AppError(404, 'Requesting user not found');
 	};
 
