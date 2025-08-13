@@ -1,4 +1,4 @@
-import { handleAcceptFollowRequest, handleFollowRequest } from "@/controllers/follow.controller";
+import { handleAcceptFollowRequest, handleFollowRequest, handleRejectFollowRequest } from "@/controllers/follow.controller";
 import { authenticateToken } from "@/middlewares/authenticate-token";
 import { validateObjectID } from "@/middlewares/validate";
 import { Router } from "express";
@@ -18,8 +18,11 @@ followRoutes.patch(
 	handleAcceptFollowRequest,
 )
 
-// followRoutes.patch(
-// 	'/follow/:requestingUserID/reject',
-// )
+followRoutes.patch(
+	'/follow-requests/:requestingUserID/reject',
+	authenticateToken(),
+	validateObjectID('requestingUserID'),
+	handleRejectFollowRequest,
+)
 
 export default followRoutes;
