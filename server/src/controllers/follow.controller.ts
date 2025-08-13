@@ -1,3 +1,4 @@
+import { FollowRequestResponseDTO } from "@/dtos/post-follow.dto";
 import { AcceptFollowRequestResponseDTO } from "@/dtos/patch-follow-request-accept.dto";
 import { acceptFollowRequest, followRequest } from "@/services/follow.service";
 import { AppError } from "@/utils/app-error";
@@ -5,7 +6,7 @@ import { NextFunction, Request, Response } from "express";
 
 export const handleFollowRequest = async (
 	req: Request,
-	res: Response,
+	res: Response<FollowRequestResponseDTO>,
 	next: NextFunction,
 ) => {
 	if (!req.user) {

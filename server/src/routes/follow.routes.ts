@@ -1,6 +1,6 @@
 import { handleAcceptFollowRequest, handleFollowRequest } from "@/controllers/follow.controller";
 import { authenticateToken } from "@/middlewares/authenticate-token";
-import { validate, validateObjectID } from "@/middlewares/validate";
+import { validateObjectID } from "@/middlewares/validate";
 import { Router } from "express";
 
 const followRoutes = Router();

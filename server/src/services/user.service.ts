@@ -4,9 +4,9 @@
  */
 
 import { CreateUserRequestDTO, CreateUserResponseDTO } from '@/dtos/create-user.dto';
-import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/login-user.dto';
+import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/post-login-user.dto';
 import { PatchProfileRequestDTO, PatchProfileResponseDTO } from '@/dtos/patch-profile.dto';
-import { ProfileResponseDTO } from '@/dtos/profile.dto';
+import { ProfileResponseDTO } from '@/dtos/get-profile.dto';
 import { UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
 import { comparePassword, generateToken, hashPassword } from '@/utils/auth';

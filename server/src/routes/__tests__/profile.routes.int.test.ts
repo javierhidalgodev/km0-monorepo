@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import request from 'supertest';
 import app from '@/app';
 import { createUser, loginUser } from '@/services/user.service';
-import { LoginResponseDTO } from '@/dtos/login-user.dto';
+import { LoginResponseDTO } from '@/dtos/post-login-user.dto';
 
 const MONGO_DB_URI = process.env.MONGO_DB_URI || 'mongodb://localhost:27017/km0-test'
 

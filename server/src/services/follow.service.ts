@@ -1,4 +1,4 @@
-import { FollowRequestResponseDTO } from '@/dtos/follow.dto';
+import { FollowRequestResponseDTO } from '@/dtos/post-follow.dto';
 import { AcceptFollowRequestResponseDTO } from '@/dtos/patch-follow-request-accept.dto';
 import { UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
