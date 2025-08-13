@@ -4,9 +4,9 @@
  */
 
 import { CreateUserRequestDTO, CreateUserResponseDTO } from '@/dtos/create-user.dto';
-import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/login-user.dto';
+import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/post-login-user.dto';
 import { PatchProfileRequestDTO, PatchProfileResponseDTO } from '@/dtos/patch-profile.dto';
-import { ProfileResponseDTO } from '@/dtos/profile.dto';
+import { ProfileResponseDTO } from '@/dtos/get-profile.dto';
 import { UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
 import { comparePassword, generateToken, hashPassword } from '@/utils/auth';
@@ -82,6 +82,21 @@ export const getProfile = async (username: string, userID?: string): Promise<Pro
         };
     };
 
+    if (userID == userProfile._id.toString()) {
+        return {
+            status: 'ok',
+            profile: {
+                username: userProfile.username,
+                email: userProfile.email,
+                birthdate: userProfile.birthdate,
+                bio: userProfile.bio,
+                followers: userProfile.followers.length,
+                following: userProfile.following.length,
+                followRequests: userProfile.followRequests,
+            }
+        };
+    }
+
     return {
         status: 'ok',
         profile: {
@@ -90,6 +105,7 @@ export const getProfile = async (username: string, userID?: string): Promise<Pro
             birthdate: userProfile.birthdate,
             bio: userProfile.bio,
             followers: userProfile.followers.length,
+            following: userProfile.following.length,
         }
     };
 };
@@ -103,7 +119,7 @@ export const patchProfile = async (userID: string, data: PatchProfileRequestDTO)
         new: true,
     });
 
-    if(!updatedProfile) {
+    if (!updatedProfile) {
         throw new AppError(404, 'User not found');
     }
 

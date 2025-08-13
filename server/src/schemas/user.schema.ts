@@ -12,6 +12,7 @@ export const createUserSchema = z.object({
     isPublic: z.boolean().optional(),
     followers: z.array(z.string()).optional(),
     followRequests: z.array(z.string()).optional(),
+    following: z.array(z.string()).optional(),
 }).strict();
 
 export const loginSchema = z.object({

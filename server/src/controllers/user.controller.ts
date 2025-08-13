@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { createUser, getProfile, loginUser, patchProfile } from '@/services/user.service';
-import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/login-user.dto';
+import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/post-login-user.dto';
 import { CreateUserRequestDTO, CreateUserResponseDTO } from '@/dtos/create-user.dto';
 import { AppError } from '@/utils/app-error';
-import { ProfileResponseDTO } from '@/dtos/profile.dto';
+import { ProfileResponseDTO } from '@/dtos/get-profile.dto';
 import { PatchProfileRequestDTO, PatchProfileResponseDTO } from '@/dtos/patch-profile.dto';
 
 export const handleUserCreation = async (
