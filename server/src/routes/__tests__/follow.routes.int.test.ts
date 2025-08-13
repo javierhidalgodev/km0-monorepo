@@ -340,7 +340,7 @@ describe('VALID PATCH REJECT /api/follow-requests/:requestingUserID/reject', () 
     });
 });
 
-describe.only('INVALID PATCH REJECT /api/follow-requests/:requestingUserID/reject', () => {
+describe('INVALID PATCH REJECT /api/follow-requests/:requestingUserID/reject', () => {
     it('Sin token no se puede hacer la petición', async () => {
         await request(app)
             .post('/api/follow/demo_user')

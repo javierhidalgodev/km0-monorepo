@@ -48,7 +48,7 @@ afterAll(async () => {
 //     await mongoose.connection.dropCollection('users')
 // })
 
-describe.only('GET /api/:username', () => {
+describe('GET /api/:username', () => {
     it('Dueño de perfil privado obtiene todos los datos', async () => {
         const profile = await request(app)
             .get('/api/demo_user')
