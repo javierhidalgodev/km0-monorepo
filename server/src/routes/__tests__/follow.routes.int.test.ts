@@ -198,14 +198,14 @@ describe('INVALID POST /api/follow/:username', () => {
     });
 });
 
-describe('VALID PATCH ACCEPT /api/follow-requests/:requestingUserID/accept', () => {
+describe('VALID PATCH ACCEPT /api/follow/requests/:requestingUserID/accept', () => {
     it('Petición aceptada exitosamente por el usuario privado', async () => {
         await request(app)
             .post('/api/follow/demo_user')
             .auth(token2, { type: 'bearer' });
 
         const response = await request(app)
-            .patch(`/api/follow-requests/${userID2}/accept`)
+            .patch(`/api/follow/requests/${userID2}/accept`)
             .auth(token, { type: 'bearer' });
 
         expect(response.status).toBe(200);
@@ -226,7 +226,7 @@ describe('VALID PATCH ACCEPT /api/follow-requests/:requestingUserID/accept', () 
             .auth(token2, { type: 'bearer' });
 
         await request(app)
-            .patch(`/api/follow-requests/${userID2}/accept`)
+            .patch(`/api/follow/requests/${userID2}/accept`)
             .auth(token, { type: 'bearer' });
 
         const profileAfter = await request(app)
@@ -239,14 +239,14 @@ describe('VALID PATCH ACCEPT /api/follow-requests/:requestingUserID/accept', () 
     });
 });
 
-describe('INVALID PATCH ACCEPT /api/follow-requests/:requestingUserID/accept', () => {
+describe('INVALID PATCH ACCEPT /api/follow/requests/:requestingUserID/accept', () => {
     it('ObjectID erróneo', async () => {
         await request(app)
             .post('/api/follow/demo_user')
             .auth(token2, { type: 'bearer' });
 
         const response = await request(app)
-            .patch('/api/follow-requests/asd/accept')
+            .patch('/api/follow/requests/asd/accept')
             .auth(token, { type: 'bearer' });
 
         expect(response.status).toBe(400);
@@ -260,7 +260,7 @@ describe('INVALID PATCH ACCEPT /api/follow-requests/:requestingUserID/accept', (
             .auth(token2, { type: 'bearer' });
 
         const response = await request(app)
-            .patch(`/api/follow-requests/${generateObjectId()}/accept`)
+            .patch(`/api/follow/requests/${generateObjectId()}/accept`)
             .auth(token, { type: 'bearer' });
 
         expect(response.status).toBe(404);
@@ -274,11 +274,11 @@ describe('INVALID PATCH ACCEPT /api/follow-requests/:requestingUserID/accept', (
             .auth(token2, { type: 'bearer' });
 
         await request(app)
-            .patch(`/api/follow-requests/${userID2}/accept`)
+            .patch(`/api/follow/requests/${userID2}/accept`)
             .auth(token, { type: 'bearer' });
 
         const response = await request(app)
-            .patch(`/api/follow-requests/${userID2}/accept`)
+            .patch(`/api/follow/requests/${userID2}/accept`)
             .auth(token, { type: 'bearer' });
 
         expect(response.status).toBe(400);
@@ -288,7 +288,7 @@ describe('INVALID PATCH ACCEPT /api/follow-requests/:requestingUserID/accept', (
 
     it('No se puede aceptar una petición de usuario que no hizo petición', async () => {
         const response = await request(app)
-            .patch(`/api/follow-requests/${userID3}/accept`)
+            .patch(`/api/follow/requests/${userID3}/accept`)
             .auth(token, { type: 'bearer' });
 
         expect(response.status).toBe(400);
@@ -297,14 +297,14 @@ describe('INVALID PATCH ACCEPT /api/follow-requests/:requestingUserID/accept', (
     });
 });
 
-describe('VALID PATCH REJECT /api/follow-requests/:requestingUserID/reject', () => {
+describe('VALID PATCH REJECT /api/follow/requests/:requestingUserID/reject', () => {
     it('Petición rechazada exitosamente por el usuario privado', async () => {
         await request(app)
             .post('/api/follow/demo_user')
             .auth(token2, { type: 'bearer' });
 
         const response = await request(app)
-            .patch(`/api/follow-requests/${userID2}/reject`)
+            .patch(`/api/follow/requests/${userID2}/reject`)
             .auth(token, { type: 'bearer' });
 
         const user = await request(app)
@@ -326,7 +326,7 @@ describe('VALID PATCH REJECT /api/follow-requests/:requestingUserID/reject', () 
 
         // Rechazar
         await request(app)
-            .patch(`/api/follow-requests/${userID2}/reject`)
+            .patch(`/api/follow/requests/${userID2}/reject`)
             .auth(token, { type: 'bearer' });
 
         // Volver a seguir
@@ -340,14 +340,14 @@ describe('VALID PATCH REJECT /api/follow-requests/:requestingUserID/reject', () 
     });
 });
 
-describe('INVALID PATCH REJECT /api/follow-requests/:requestingUserID/reject', () => {
+describe('INVALID PATCH REJECT /api/follow/requests/:requestingUserID/reject', () => {
     it('Sin token no se puede hacer la petición', async () => {
         await request(app)
             .post('/api/follow/demo_user')
             .auth(token2, { type: 'bearer' });
 
         const response = await request(app)
-            .patch(`/api/follow-requests/${userID2}/reject`);
+            .patch(`/api/follow/requests/${userID2}/reject`);
 
         expect(response.status).toBe(401);
         expect(response.body.status).toBe('error');
@@ -360,7 +360,7 @@ describe('INVALID PATCH REJECT /api/follow-requests/:requestingUserID/reject', (
             .auth(token2, { type: 'bearer' });
 
         const response = await request(app)
-            .patch(`/api/follow-requests/${generateObjectId()}/reject`)
+            .patch(`/api/follow/requests/${generateObjectId()}/reject`)
             .auth(token, { type: 'bearer' });
 
         expect(response.status).toBe(404);
@@ -374,11 +374,11 @@ describe('INVALID PATCH REJECT /api/follow-requests/:requestingUserID/reject', (
             .auth(token2, { type: 'bearer' });
 
         await request(app)
-            .patch(`/api/follow-requests/${userID2}/accept`)
+            .patch(`/api/follow/requests/${userID2}/accept`)
             .auth(token, { type: 'bearer' });
 
         const response = await request(app)
-            .patch(`/api/follow-requests/${userID2}/reject`)
+            .patch(`/api/follow/requests/${userID2}/reject`)
             .auth(token, { type: 'bearer' });
 
         expect(response.status).toBe(400);
@@ -388,11 +388,66 @@ describe('INVALID PATCH REJECT /api/follow-requests/:requestingUserID/reject', (
 
     it('No se puede rechazar una petición de usuario que no hizo petición', async () => {
         const response = await request(app)
-            .patch(`/api/follow-requests/${userID3}/reject`)
+            .patch(`/api/follow/requests/${userID3}/reject`)
             .auth(token, { type: 'bearer' });
 
         expect(response.status).toBe(400);
         expect(response.body.status).toBe('error');
         expect(response.body.message).toBe('This user does not requested to follow you');
+    });
+});
+
+describe('GET follow requests', () => {
+    it('Petición exitosa', async () => {
+        await request(app)
+            .post('/api/follow/demo_user')
+            .auth(token2, { type: 'bearer' });
+
+        const response = await request(app)
+            .get('/api/follow/follow-requests')
+            .auth(token, { type: 'bearer' });
+
+        expect(response.status).toBe(200);
+        expect(response.body.status).toBe('ok');
+        expect(response.body).toHaveProperty('followRequests');
+        expect(response.body.followRequests).toHaveLength(1);
+        expect(response.body.followRequests).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining(
+                    {
+                        _id: userID2,
+                        username: 'demo_user_2',
+                        isPublic: true
+                    }
+                )
+            ]),
+        );
+    });
+
+    it('Recuperación correcta del array de followRequests tras aceptar una petición', async () => {
+        await request(app)
+            .post('/api/follow/demo_user')
+            .auth(token2, { type: 'bearer' });
+
+        await request(app)
+            .patch(`/api/follow/requests/${userID2}/accept`)
+            .auth(token, { type: 'bearer' });
+
+        const response = await request(app)
+            .get('/api/follow/follow-requests')
+            .auth(token, { type: 'bearer' });
+
+        expect(response.status).toBe(200);
+        expect(response.body.status).toBe('ok');
+        expect(response.body).toHaveProperty('followRequests');
+        expect(response.body.followRequests).toHaveLength(0);
+    });
+
+    it('Petición sin token inválida', async () => {
+        const response = await request(app)
+            .get('/api/follow/follow-requests');
+
+        expect(response.status).toBe(401);
+        expect(response.body.message).toBe('Invalid token');
     });
 });
