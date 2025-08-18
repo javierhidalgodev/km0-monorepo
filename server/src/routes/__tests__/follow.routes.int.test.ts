@@ -451,3 +451,60 @@ describe('GET follow requests', () => {
         expect(response.body.message).toBe('Invalid token');
     });
 });
+
+describe.only('DELETE unfollow request', () => {
+    it('Se deja de seguir al usuario exitosamente', async () => {
+        await request(app)
+            .post('/api/follow/demo_user')
+            .auth(token2, { type: 'bearer' });
+
+        await request(app)
+            .patch(`/api/follow/requests/${userID2}/accept`)
+            .auth(token, { type: 'bearer' });
+
+        const response = await request(app)
+            .delete(`/api/follow/${username}`)
+            .auth(token2, { type: 'bearer' });
+
+        expect(response.status).toBe(200);
+        expect(response.body.status).toBe('unfollowed');
+        expect(response.body.message).toBe(`You no longer follow ${username}`);
+    });
+
+    it('Sin token la petición no es exitosa', async () => {
+        await request(app)
+            .post('/api/follow/demo_user')
+            .auth(token2, { type: 'bearer' });
+
+        await request(app)
+            .patch(`/api/follow/requests/${userID2}/accept`)
+            .auth(token, { type: 'bearer' });
+
+        const response = await request(app)
+            .delete(`/api/follow/${username}`);
+
+        expect(response.status).toBe(401);
+        expect(response.body.status).toBe('error');
+        expect(response.body.message).toBe('Invalid token');
+    });
+
+    it('Intentar dejar de seguir a un usuario que no se seguía', async () => {
+        const response = await request(app)
+            .delete(`/api/follow/${username}`)
+            .auth(token, { type: 'bearer' });
+
+        expect(response.status).toBe(400);
+        expect(response.body.status).toBe('error');
+        expect(response.body.message).toBe('You aren\'t following this user');
+    });
+
+    it('Intentar dejar de seguir a un usuario que no existe', async () => {
+        const response = await request(app)
+            .delete('/api/follow/fakeUser')
+            .auth(token, { type: 'bearer' });
+
+        expect(response.status).toBe(404);
+        expect(response.body.status).toBe('error');
+        expect(response.body.message).toBe('User not found');
+    });
+});
