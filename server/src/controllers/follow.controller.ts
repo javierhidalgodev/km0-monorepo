@@ -1,10 +1,11 @@
 import { FollowRequestResponseDTO } from '@/dtos/post-follow.dto';
 import { AcceptFollowRequestResponseDTO } from '@/dtos/patch-follow-request-accept.dto';
-import { acceptFollowRequest, followRequest, getFollowRequests, rejectFollowRequest } from '@/services/follow.service';
+import { acceptFollowRequest, deleteUnfollow, followRequest, getFollowRequests, rejectFollowRequest } from '@/services/follow.service';
 import { AppError } from '@/utils/app-error';
 import { NextFunction, Request, Response } from 'express';
 import { RejectFollowRequestResponseDTO } from '@/dtos/patch-follow-request-reject.dto';
 import { GetFollowRequestsResponseDTO } from '@/dtos/get-follow-requests.dto';
+import { DeleteUnfollowResponseDTO } from '@/dtos/delete-unfollow.dto';
 
 export const handleFollowRequest = async (
 	req: Request,
@@ -89,10 +90,29 @@ export const handleGetFollowRequests = async (
 
 	try {
 		const response = await getFollowRequests(req.user.id);
-		console.log(response);
-		
+
 		res.status(200).json(response);
 	} catch (error) {
-		next(error);	
+		next(error);
+	};
+};
+
+export const handleUnfollowRequest = async (
+	req: Request,
+	res: Response<DeleteUnfollowResponseDTO>,
+	next: NextFunction,
+) => {
+	if (!req.user) {
+		throw new AppError(401, 'Invalid token');
+	};
+
+	const username = req.params.username;
+
+	try {
+		const response = await deleteUnfollow(req.user.id, username);
+
+		res.status(200).json(response);
+	} catch (error) {
+		next(error);
 	};
 };

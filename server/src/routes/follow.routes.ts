@@ -1,4 +1,4 @@
-import { handleAcceptFollowRequest, handleFollowRequest, handleGetFollowRequests, handleRejectFollowRequest } from '@/controllers/follow.controller';
+import { handleAcceptFollowRequest, handleFollowRequest, handleGetFollowRequests, handleRejectFollowRequest, handleUnfollowRequest } from '@/controllers/follow.controller';
 import { authenticateToken } from '@/middlewares/authenticate-token';
 import { validateObjectID } from '@/middlewares/validate';
 import { Router } from 'express';
@@ -29,6 +29,12 @@ followRoutes.post(
 	'/follow/:username',
 	authenticateToken(),
 	handleFollowRequest,
+);
+
+followRoutes.delete(
+	'/follow/:username',
+	authenticateToken(),
+	handleUnfollowRequest,
 );
 
 export default followRoutes;
