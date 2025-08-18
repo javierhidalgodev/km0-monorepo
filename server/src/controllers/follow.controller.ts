@@ -1,9 +1,10 @@
-import { FollowRequestResponseDTO } from "@/dtos/post-follow.dto";
-import { AcceptFollowRequestResponseDTO } from "@/dtos/patch-follow-request-accept.dto";
-import { acceptFollowRequest, followRequest, rejectFollowRequest } from "@/services/follow.service";
-import { AppError } from "@/utils/app-error";
-import { NextFunction, Request, Response } from "express";
-import { RejectFollowRequestResponseDTO } from "@/dtos/patch-follow-request-reject.dto";
+import { FollowRequestResponseDTO } from '@/dtos/post-follow.dto';
+import { AcceptFollowRequestResponseDTO } from '@/dtos/patch-follow-request-accept.dto';
+import { acceptFollowRequest, followRequest, getFollowRequests, rejectFollowRequest } from '@/services/follow.service';
+import { AppError } from '@/utils/app-error';
+import { NextFunction, Request, Response } from 'express';
+import { RejectFollowRequestResponseDTO } from '@/dtos/patch-follow-request-reject.dto';
+import { GetFollowRequestsResponseDTO } from '@/dtos/get-follow-requests.dto';
 
 export const handleFollowRequest = async (
 	req: Request,
@@ -76,3 +77,22 @@ export const handleRejectFollowRequest = async (
 		next(error)
 	};
 }
+
+export const handleGetFollowRequests = async (
+	req: Request,
+	res: Response<GetFollowRequestsResponseDTO>,
+	next: NextFunction,
+) => {
+	if (!req.user) {
+		throw new AppError(401, 'Invalid token');
+	};
+
+	try {
+		const response = await getFollowRequests(req.user.id);
+		console.log(response);
+		
+		res.status(200).json(response);
+	} catch (error) {
+		next(error);	
+	};
+};

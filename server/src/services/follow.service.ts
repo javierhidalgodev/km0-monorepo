@@ -1,10 +1,11 @@
 import { FollowRequestResponseDTO } from '@/dtos/post-follow.dto';
 import { AcceptFollowRequestResponseDTO } from '@/dtos/patch-follow-request-accept.dto';
-import { UserModel } from '@/models/user.model';
+import { IUser, UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
 import { followPublicUser, requestToFollowPrivateUser } from '@/utils/follow.service.utils';
 import { findUserByUsername } from '@/utils/user.service.utils';
 import { RejectFollowRequestResponseDTO } from '@/dtos/patch-follow-request-reject.dto';
+import { GetFollowRequestsResponseDTO } from '@/dtos/get-follow-requests.dto';
 
 export const followRequest = async (username: string, requestingUserID: string): Promise<FollowRequestResponseDTO> => {
 	const userToFollow = await findUserByUsername(username);
@@ -86,3 +87,29 @@ export const rejectFollowRequest = async (userID: string, requestingUserID: stri
 		message: `Follow request from ${requestingUser.username} rejected`,
 	};
 }
+
+export type PopulateFollowRequestsUser = Omit<IUser, 'followRequests'> & ({
+	followRequests: {
+		id: string,
+		username: string,
+		bio?: string,
+		isPublic: boolean,
+	}[];
+});
+
+export const getFollowRequests = async (userID: string): Promise<GetFollowRequestsResponseDTO> => {
+	console.log(userID);
+	const user = await UserModel
+		.findById(userID)
+		.populate('followRequests', 'username bio isPublic')
+		.lean<PopulateFollowRequestsUser>();
+
+	if(!user) {
+		throw new AppError(404, 'User not found');
+	}
+
+	return {
+		status: 'ok',
+		followRequests: user.followRequests,
+	}
+};

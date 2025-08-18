@@ -12,9 +12,9 @@ app.use(express.json());
 app.use('/api', healthRoutes);
 
 app.use('/api', postRoutes);
+app.use('/api', followRoutes);
 app.use('/api', userRoutes);
 app.use('/api', commentRoutes);
-app.use('/api', followRoutes);
 
 app.use(errorHandler);
 
