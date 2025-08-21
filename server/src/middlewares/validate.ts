@@ -3,11 +3,11 @@ import { ZodSchema } from 'zod';
 import { AppError } from '@/utils/app-error';
 import mongoose from 'mongoose';
 
-export type ValidateSource = 'body' | 'query';
+export type ValidateSource = 'body' | 'query' | 'params';
 
 export const validate = (schema: ZodSchema, source: ValidateSource): RequestHandler => {
     return (req, _res, next) => {
-        const result = schema.safeParse(req[source]);
+        const result = schema.safeParse(req[source]);            
 
         if (!result.success) {
             return next(
