@@ -1,7 +1,12 @@
 import { z } from 'zod';
 
+export const usernameSchema = z.string()
+    .min(3)
+    .max(20)
+    .regex(/^[a-zA-Z0-9_]+$/, 'Please, use only alphanumeric characters and _');
+
 export const createUserSchema = z.object({
-    username: z.string().min(3),
+    username: usernameSchema,
     password: z.string().min(6),
     email: z.string().email(),
     birthdate: z.string().refine(dateStr => {
