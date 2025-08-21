@@ -11,6 +11,10 @@ export const deleteFollower = async (userID: string, username: string): Promise<
         throw new AppError(404, 'User not found');
     };
 
+    if (user.id === userToDelete.id) {
+        throw new AppError(400, 'Cannot delete yourself, because you can\'t follow yourself');
+    };
+
     if (!user.followers.includes(userToDelete.id)) {
         throw new AppError(400, 'This user is not following you');
     };
