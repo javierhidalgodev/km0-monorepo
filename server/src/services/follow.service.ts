@@ -6,6 +6,7 @@ import { followPublicUser, requestToFollowPrivateUser } from '@/utils/follow.ser
 import { findUserByUsername } from '@/utils/user.service.utils';
 import { RejectFollowRequestResponseDTO } from '@/dtos/patch-follow-request-reject.dto';
 import { GetFollowRequestsResponseDTO } from '@/dtos/get-follow-requests.dto';
+import { DeleteUnfollowResponseDTO } from '@/dtos/delete-unfollow.dto';
 
 export const followRequest = async (username: string, requestingUserID: string): Promise<FollowRequestResponseDTO> => {
 	const userToFollow = await findUserByUsername(username);
@@ -112,4 +113,29 @@ export const getFollowRequests = async (userID: string): Promise<GetFollowReques
 		status: 'ok',
 		followRequests: user.followRequests,
 	}
+};
+
+export const deleteUnfollow = async (userID: string, username: string): Promise<DeleteUnfollowResponseDTO> => {
+	const userToUnfollow = await findUserByUsername(username);
+	const requestingUser = await UserModel.findById(userID);
+
+	if(!userToUnfollow || !requestingUser) {
+		throw new AppError(404, 'User not found');
+	};
+
+	if(!requestingUser.following.includes(userToUnfollow.id)) {
+		throw new AppError(400, 'You aren\'t following this user');
+	};
+
+	await requestingUser.updateOne({
+		$pull: { following: userToUnfollow.id }
+	});
+	await userToUnfollow.updateOne({
+		$pull: { followers: userID }
+	});
+
+	return {
+		status: 'unfollowed',
+		message: `You no longer follow ${userToUnfollow.username}`,
+	};
 };
