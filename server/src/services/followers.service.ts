@@ -1,7 +1,7 @@
-import { DeleteFollowerResponseDTO } from "@/dtos/delete-follower.dto";
-import { UserModel } from "@/models/user.model"
-import { AppError } from "@/utils/app-error";
-import { findUserByUsername } from "@/utils/user.service.utils";
+import { DeleteFollowerResponseDTO } from '@/dtos/delete-follower.dto';
+import { UserModel } from '@/models/user.model';
+import { AppError } from '@/utils/app-error';
+import { findUserByUsername } from '@/utils/user.service.utils';
 
 export const deleteFollower = async (userID: string, username: string): Promise<DeleteFollowerResponseDTO> => {
     const user = await UserModel.findById(userID);
