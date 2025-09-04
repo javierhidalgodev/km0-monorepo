@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { handleGetProfile, handleGetUsersFollowers, handlePatchProfile, handleUserCreation, handleUserLogin } from '@/controllers/user.controller';
+import { handleGetProfile, handleGetUsersFollowers, handleGetUsersFollowing, handlePatchProfile, handleUserCreation, handleUserLogin } from '@/controllers/user.controller';
 import { validate, validateBody } from '@/middlewares/validate';
 import { createUserSchema, loginSchema, patchProfileSchema } from '@/schemas/user.schema';
 import { authenticateToken } from '@/middlewares/authenticate-token';
@@ -31,6 +31,13 @@ userRoutes.get(
     authenticateToken(),
     validate(paramsUsernameSchema, 'params'),
     handleGetUsersFollowers,
+);
+
+userRoutes.get(
+    '/:username/following',
+    authenticateToken(),
+    validate(paramsUsernameSchema, 'params'),
+    handleGetUsersFollowing,
 );
 
 userRoutes.patch(

@@ -7,11 +7,12 @@ import { CreateUserRequestDTO, CreateUserResponseDTO } from '@/dtos/create-user.
 import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/post-login-user.dto';
 import { PatchProfileRequestDTO, PatchProfileResponseDTO } from '@/dtos/patch-profile.dto';
 import { ProfileResponseDTO } from '@/dtos/get-profile.dto';
-import { PopulateFollowers, UserModel } from '@/models/user.model';
+import { TPopulateFollowers, TPopulateFollowing, UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
 import { comparePassword, generateToken, hashPassword } from '@/utils/auth';
 import { findUserByUsername } from '@/utils/user.service.utils';
 import { GetUsersFollowersResponseDTO } from '@/dtos/get-users-followers.dto';
+import { GetUsersFollowingResponseDTO, PopulateFollowing } from '@/dtos/get-users-following.dto';
 
 
 export const createUser = async (data: CreateUserRequestDTO): Promise<CreateUserResponseDTO> => {
@@ -75,7 +76,7 @@ export const getUsersFollowers = async (userID: string, username: string): Promi
 
     const populateFollowerUser = await UserModel.findById(user.id)
         .populate('followers', 'username bio followers following')
-        .lean<PopulateFollowers>();
+        .lean<TPopulateFollowers>();
 
     if (!populateFollowerUser) {
         throw new AppError(404, 'User not found');
@@ -97,6 +98,40 @@ export const getUsersFollowers = async (userID: string, username: string): Promi
     return {
         status: 'ok',
         followers: formatted,
+    }
+};
+
+export const getUsersFollowing = async (userID: string, username: string): Promise<GetUsersFollowingResponseDTO> => {
+    const user = await findUserByUsername(username);
+
+    if (!user) {
+        throw new AppError(404, 'User not found');
+    };
+
+    const populateFollowingUser = await UserModel.findById(user.id)
+        .populate('following', 'username bio followers following')
+        .lean<TPopulateFollowing>();
+
+    if (!populateFollowingUser) {
+        throw new AppError(404, 'User not found');
+    };
+
+    // Usuario privado y que no coincide con el ID del solicitante, contenido bloqueado
+    if (!user.isPublic && userID !== user.id) {
+        throw new AppError(403, 'Forbidden');
+    }
+
+    const formatted = populateFollowingUser.following.map(f => ({
+        id: f.id,
+        username: f.username,
+        bio: f.bio,
+        followers: f.followers.length,
+        following: f.following.length,
+    }));
+
+    return {
+        status: 'ok',
+        following: formatted,
     }
 };
 

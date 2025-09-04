@@ -224,3 +224,114 @@ describe('GET /api/:username/followers', () => {
         expect(response.body.message).toBe('Forbidden');
     });
 });
+
+describe('GET /api/:username/following', () => {
+    let token: string;
+    let username: string;
+
+    let token2: string
+
+    beforeAll(async () => {
+        await mongoose.connection.dropCollection('users');
+
+        await request(app)
+            .post('/api/users')
+            .send({
+                username: 'demo_user',
+                email: 'demo_user@mail.com',
+                birthdate: '1990-01-01',
+                password: '123456',
+                isPublic: false,
+            });
+
+        await request(app)
+            .post('/api/users')
+            .send({
+                username: 'demo_user_2',
+                email: 'demo_user_2@mail.com',
+                birthdate: '1990-01-01',
+                password: '123456',
+            });
+
+        const login = await request(app)
+            .post('/api/login')
+            .send({
+                email: 'demo_user@mail.com',
+                password: '123456',
+            });
+
+        token = login.body.token;
+        username = login.body.user.username;
+
+        const login2 = await request(app)
+            .post('/api/login')
+            .send({
+                email: 'demo_user_2@mail.com',
+                password: '123456',
+            });
+
+        token2 = login2.body.token;
+
+        await request(app)
+            .post('/api/follow/demo_user_2')
+            .auth(token, { type: 'bearer' });
+    })
+
+    it('Se devuelven los seguidos del usuario PRIVADO con detalles, consultado por el propietario', async () => {
+        const response = await request(app)
+            .get('/api/demo_user_2/following')
+            .auth(token2, { type: 'bearer' });
+
+        const response2 = await request(app)
+            .get('/api/demo_user/following')
+            .auth(token, { type: 'bearer' });
+
+        expect(response.status).toBe(200);
+        expect(response.body.status).toBe('ok');
+        expect(response.body).toHaveProperty('following');
+        expect(response.body.following).toHaveLength(0);
+        expect(response2.body.following).toHaveLength(1);
+        expect(response2.body.following[0].followers).toBe(1);
+        expect(response2.body.following[0].following).toBe(0);
+    });
+
+    it('Un usuario distinto al propietario, puede recuperar los seguidos del usuario PÚBLICO', async () => {
+        const response = await request(app)
+            .get('/api/demo_user_2/following')
+            .auth(token, { type: 'bearer' });
+
+        expect(response.status).toBe(200);
+        expect(response.body.status).toBe('ok');
+        expect(response.body).toHaveProperty('following');
+        expect(response.body.following).toHaveLength(0);
+    });
+
+    it('Sin token no se recuperan resultados', async () => {
+        const response = await request(app)
+            .get('/api/demo_user/following');
+
+        expect(response.status).toBe(401);
+        expect(response.body.status).toBe('error');
+        expect(response.body.message).toBe('Invalid token');
+    });
+
+    it('Se intentan recuperar los seguidos de un usuario inexistente', async () => {
+        const response = await request(app)
+            .get('/api/demo_user_fake/following')
+            .auth(token2, { type: 'bearer' });
+
+        expect(response.status).toBe(404);
+        expect(response.body.status).toBe('error');
+        expect(response.body.message).toBe('User not found');
+    });
+
+    it('Un usuario distinto al propietario, quiere recuperar los seguidos del usuario privado', async () => {
+        const response = await request(app)
+            .get('/api/demo_user/following')
+            .auth(token2, { type: 'bearer' });
+
+        expect(response.status).toBe(403);
+        expect(response.body.status).toBe('error');
+        expect(response.body.message).toBe('Forbidden');
+    });
+});
