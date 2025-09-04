@@ -452,7 +452,7 @@ describe('GET follow requests', () => {
     });
 });
 
-describe.only('DELETE unfollow request', () => {
+describe('DELETE unfollow request', () => {
     it('Se deja de seguir al usuario exitosamente', async () => {
         await request(app)
             .post('/api/follow/demo_user')

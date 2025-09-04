@@ -3,7 +3,6 @@ import request from 'supertest';
 import app from '@/app';
 import { UserModel } from '@/models/user.model';
 import { createUser } from '@/services/user.service';
-import { createTestUser, logUser } from './helpers';
 
 const MONGO_DB_URI = process.env.MONGO_DB_URI || 'mongodb://localhost:27017/km0-test'
 
