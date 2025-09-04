@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
-import { createUser, getProfile, loginUser, patchProfile } from '@/services/user.service';
+import { createUser, getProfile, getUsersFollowers, loginUser, patchProfile } from '@/services/user.service';
 import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/post-login-user.dto';
 import { CreateUserRequestDTO, CreateUserResponseDTO } from '@/dtos/create-user.dto';
 import { AppError } from '@/utils/app-error';
 import { ProfileResponseDTO } from '@/dtos/get-profile.dto';
 import { PatchProfileRequestDTO, PatchProfileResponseDTO } from '@/dtos/patch-profile.dto';
+import { GetUsersFollowersResponseDTO } from '@/dtos/get-users-followers.dto';
 
 export const handleUserCreation = async (
     req: Request,
@@ -32,6 +33,28 @@ export const handleUserLogin = async (
         res.status(201).json(response);
     } catch (error) {
         return next(error);
+    };
+};
+
+export const handleGetUsersFollowers = async (
+    req: Request,
+    res: Response<GetUsersFollowersResponseDTO>,
+    next: NextFunction
+) => {
+    const user = req.user;
+
+    if (!user) {
+        throw new AppError(404, 'User not found');
+    };
+
+    const username = req.params.username;
+
+    try {
+        const response = await getUsersFollowers(user.id, username);
+
+        res.status(200).json(response);
+    } catch (error) {
+        next(error);
     };
 };
 

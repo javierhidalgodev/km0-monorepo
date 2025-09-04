@@ -1,7 +1,7 @@
-import { DeleteFollowerResponseDTO } from "@/dtos/delete-follower.dto";
-import { deleteFollower } from "@/services/followers.service";
-import { AppError } from "@/utils/app-error";
-import { NextFunction, Request, Response } from "express"
+import { DeleteFollowerResponseDTO } from '@/dtos/delete-follower.dto';
+import { deleteFollower } from '@/services/followers.service';
+import { AppError } from '@/utils/app-error';
+import { NextFunction, Request, Response } from 'express';
 
 export const handleDeleteFollower = async (
     req: Request,

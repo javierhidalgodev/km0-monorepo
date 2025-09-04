@@ -1,8 +1,8 @@
-import { handleDeleteFollower } from "@/controllers/followers.controller";
-import { authenticateToken } from "@/middlewares/authenticate-token";
-import { validate } from "@/middlewares/validate";
-import { paramsUsernameSchema } from "@/schemas/followers.schema";
-import { Router } from "express";
+import { handleDeleteFollower } from '@/controllers/followers.controller';
+import { authenticateToken } from '@/middlewares/authenticate-token';
+import { validate } from '@/middlewares/validate';
+import { paramsUsernameSchema } from '@/schemas/followers.schema';
+import { Router } from 'express';
 
 const followersRoutes = Router();
 
