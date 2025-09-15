@@ -1,12 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { createUser, getProfile, getUsersFollowers, getUsersFollowing, loginUser, patchProfile } from '@/services/user.service';
-import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/post-login-user.dto';
-import { CreateUserRequestDTO, CreateUserResponseDTO } from '@/dtos/create-user.dto';
+import { LoginRequestDTO, LoginResponseDTO, CreateUserRequestDTO, CreateUserResponseDTO, PatchProfileRequestDTO, PatchProfileResponseDTO, GetProfileResponseDTO, GetUsersFollowersResponseDTO, GetUsersFollowingResponseDTO } from '@/dtos/users.dto';
 import { AppError } from '@/utils/app-error';
-import { ProfileResponseDTO } from '@/dtos/get-profile.dto';
-import { PatchProfileRequestDTO, PatchProfileResponseDTO } from '@/dtos/patch-profile.dto';
-import { GetUsersFollowersResponseDTO } from '@/dtos/get-users-followers.dto';
-import { GetUsersFollowingResponseDTO } from '@/dtos/get-users-following.dto';
 
 export const handleUserCreation = async (
     req: Request,
@@ -83,7 +78,7 @@ export const handleGetUsersFollowing = async (
 
 export const handleGetProfile = async (
     req: Request,
-    res: Response<ProfileResponseDTO>,
+    res: Response<GetProfileResponseDTO>,
     next: NextFunction,
 ) => {
     const token = req.user;

@@ -1,10 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { createPost, deletePost, getAllPosts, getPostDetail, getPostsMine } from '@/services/post.service';
 import { AppError } from '@/utils/app-error';
-import { CreatePostResponseDTO } from '@/dtos/create-post.dto';
-import { GetPostsResponseDTO } from '@/dtos/get-post.dto';
-import { DeletePostResponseDTO } from '@/dtos/delete-post.dto';
-import { GetPostDetailResponseDTO } from '@/dtos/get-post-detail.dto';
+import { CreatePostResponseDTO, GetPostsResponseDTO, GetPostDetailResponseDTO, DeletePostResponseDTO } from '@/dtos/posts.dto';
 
 export const handlePostCreation = async (
     req: Request,

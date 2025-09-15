@@ -1,11 +1,7 @@
-import { FollowRequestResponseDTO } from '@/dtos/post-follow.dto';
-import { AcceptFollowRequestResponseDTO } from '@/dtos/patch-follow-request-accept.dto';
+import { FollowRequestResponseDTO, AcceptFollowRequestResponseDTO, RejectFollowRequestResponseDTO, DeleteUnfollowResponseDTO, GetFollowRequestsResponseDTO } from '@/dtos/follow.dto';
 import { acceptFollowRequest, deleteUnfollow, followRequest, getFollowRequests, rejectFollowRequest } from '@/services/follow.service';
 import { AppError } from '@/utils/app-error';
 import { NextFunction, Request, Response } from 'express';
-import { RejectFollowRequestResponseDTO } from '@/dtos/patch-follow-request-reject.dto';
-import { GetFollowRequestsResponseDTO } from '@/dtos/get-follow-requests.dto';
-import { DeleteUnfollowResponseDTO } from '@/dtos/delete-unfollow.dto';
 
 export const handleFollowRequest = async (
 	req: Request,

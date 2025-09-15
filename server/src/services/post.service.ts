@@ -1,12 +1,9 @@
-import { CreatePostRequestDTO, CreatePostResponseDTO } from '@/dtos/create-post.dto';
-import { GetPostsResponseDTO } from '@/dtos/get-post.dto';
+import { CreatePostRequestDTO, CreatePostResponseDTO, GetPostsResponseDTO, GetPostDetailResponseDTO, DeletePostResponseDTO } from '@/dtos/posts.dto';
 import { IPost, PopulatePost, PostModel } from '@/models/post.model';
 import { UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
-import { getMine, getPosts, mapPosts, PostFilter } from '@/utils/post.services.utils';
+import { getMine, getPosts, mapPosts } from '@/utils/post.services.utils';
 import { IPostsQueryParams } from '@/schemas/post.schema';
-import { DeletePostResponseDTO } from '@/dtos/delete-post.dto';
-import { GetPostDetailResponseDTO } from '@/dtos/get-post-detail.dto';
 import { CommentModel, PopulateComment } from '@/models/comment.model';
 import { mapComments } from '@/utils/comment.service.utils';
 

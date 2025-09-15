@@ -255,7 +255,7 @@ describe('VALID DELETE /api/comments/:commentID', () => {
 
         expect(response.statusCode).toBe(200);
         expect(response.body.status).toBe('deleted');
-        expect(response.body.message).toBe('Comment deleted succesfully');
+        expect(response.body.message).toBe('Comment deleted successfully');
     });
 });
 

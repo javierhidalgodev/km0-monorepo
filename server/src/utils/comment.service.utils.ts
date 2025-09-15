@@ -1,12 +1,12 @@
-import { GetCommentResponseDTO } from '@/dtos/get-comments.dto';
 import { PopulateComment } from '@/models/comment.model';
 import { PopulatePost, PostModel } from '@/models/post.model';
 import { AppError } from './app-error';
+import { MappedComment } from '@/dtos/comments.dto';
 
-export const mapComments = (comments: PopulateComment[]): GetCommentResponseDTO[] => {
-    return comments.map<GetCommentResponseDTO>((c: PopulateComment) => {
+export const mapComments = (comments: PopulateComment[]): MappedComment[] => {
+    return comments.map<MappedComment>((c: PopulateComment) => {
         return ({
-            id: c.id,
+            id: c._id.toString(),
             user: {
                 id: c.user._id.toString(),
                 username: c.user.username

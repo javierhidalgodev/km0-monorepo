@@ -1,4 +1,4 @@
-import { PostResponseDTO } from '@/dtos/get-post.dto';
+import { PostResponseDTO } from '@/dtos/posts.dto';
 import { IPost, PopulatePost, PostModel } from '@/models/post.model';
 import { IPostsQueryParams } from '@/schemas/post.schema';
 import { FilterQuery, Query } from 'mongoose';

@@ -8,8 +8,9 @@ export interface IComment extends Document {
 };
 
 export type PopulateComment = Omit<IComment, 'user'> & ({
+    _id: Types.ObjectId,
     user: {
-        _id: string,
+        _id: Types.ObjectId,
         username: string,
     },
 });

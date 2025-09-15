@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { AppError } from '@/utils/app-error';
 import { createComment, deletePostComment, getCommentById, getPostComments } from '@/services/comment.service';
-import { CreateCommentResponseDTO } from '@/dtos/create-comment.dto';
-import { GetCommentResponseDTO, GetCommentsResponseDTO } from '@/dtos/get-comments.dto';
-import { DeleteCommentResponseDTO } from '@/dtos/delete-comment.dto';
+import { CreateCommentResponseDTO, GetCommentsResponseDTO, DeleteCommentResponseDTO, GetSingleCommentResponseDTO } from '@/dtos/comments.dto';
 
 export const handleCommentCreation = async (
     req: Request,
@@ -30,7 +28,7 @@ export const handleCommentCreation = async (
 
 export const handleGetComment = async (
     req: Request,
-    res: Response<GetCommentResponseDTO>,
+    res: Response<GetSingleCommentResponseDTO>,
     next: NextFunction,
 ) => {
     const commentID = req.params.commentID;

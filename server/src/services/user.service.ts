@@ -3,17 +3,11 @@
  * que no dependa del framework (Express.js)
  */
 
-import { CreateUserRequestDTO, CreateUserResponseDTO } from '@/dtos/create-user.dto';
-import { LoginRequestDTO, LoginResponseDTO } from '@/dtos/post-login-user.dto';
-import { PatchProfileRequestDTO, PatchProfileResponseDTO } from '@/dtos/patch-profile.dto';
-import { ProfileResponseDTO } from '@/dtos/get-profile.dto';
+import { CreateUserRequestDTO, CreateUserResponseDTO, LoginRequestDTO, LoginResponseDTO, PatchProfileRequestDTO, PatchProfileResponseDTO, GetProfileResponseDTO, GetUsersFollowersResponseDTO, GetUsersFollowingResponseDTO } from '@/dtos/users.dto';
 import { TPopulateFollowers, TPopulateFollowing, UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
 import { comparePassword, generateToken, hashPassword } from '@/utils/auth';
 import { findUserByUsername } from '@/utils/user.service.utils';
-import { GetUsersFollowersResponseDTO } from '@/dtos/get-users-followers.dto';
-import { GetUsersFollowingResponseDTO, PopulateFollowing } from '@/dtos/get-users-following.dto';
-
 
 export const createUser = async (data: CreateUserRequestDTO): Promise<CreateUserResponseDTO> => {
     const { email, password } = data;
@@ -135,7 +129,7 @@ export const getUsersFollowing = async (userID: string, username: string): Promi
     }
 };
 
-export const getProfile = async (username: string, userID?: string): Promise<ProfileResponseDTO> => {
+export const getProfile = async (username: string, userID?: string): Promise<GetProfileResponseDTO> => {
     const userProfile = await UserModel.findOne({ username }).lean();
 
     if (!userProfile) {

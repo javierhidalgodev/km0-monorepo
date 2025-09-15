@@ -1,4 +1,4 @@
-import { DeleteFollowerResponseDTO } from '@/dtos/delete-follower.dto';
+import { DeleteFollowerResponseDTO } from '@/dtos/followers.dto';
 import { UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
 import { findUserByUsername } from '@/utils/user.service.utils';

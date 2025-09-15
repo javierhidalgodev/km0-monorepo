@@ -1,12 +1,8 @@
-import { FollowRequestResponseDTO } from '@/dtos/post-follow.dto';
-import { AcceptFollowRequestResponseDTO } from '@/dtos/patch-follow-request-accept.dto';
+import { FollowRequestResponseDTO, AcceptFollowRequestResponseDTO, RejectFollowRequestResponseDTO, DeleteUnfollowResponseDTO, GetFollowRequestsResponseDTO } from '@/dtos/follow.dto';
 import { IUser, UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
 import { followPublicUser, requestToFollowPrivateUser } from '@/utils/follow.service.utils';
 import { findUserByUsername } from '@/utils/user.service.utils';
-import { RejectFollowRequestResponseDTO } from '@/dtos/patch-follow-request-reject.dto';
-import { GetFollowRequestsResponseDTO } from '@/dtos/get-follow-requests.dto';
-import { DeleteUnfollowResponseDTO } from '@/dtos/delete-unfollow.dto';
 
 export const followRequest = async (username: string, requestingUserID: string): Promise<FollowRequestResponseDTO> => {
 	const userToFollow = await findUserByUsername(username);
@@ -105,7 +101,7 @@ export const getFollowRequests = async (userID: string): Promise<GetFollowReques
 		.populate('followRequests', 'username bio isPublic')
 		.lean<PopulateFollowRequestsUser>();
 
-	if(!user) {
+	if (!user) {
 		throw new AppError(404, 'User not found');
 	}
 
@@ -119,11 +115,11 @@ export const deleteUnfollow = async (userID: string, username: string): Promise<
 	const userToUnfollow = await findUserByUsername(username);
 	const requestingUser = await UserModel.findById(userID);
 
-	if(!userToUnfollow || !requestingUser) {
+	if (!userToUnfollow || !requestingUser) {
 		throw new AppError(404, 'User not found');
 	};
 
-	if(!requestingUser.following.includes(userToUnfollow.id)) {
+	if (!requestingUser.following.includes(userToUnfollow.id)) {
 		throw new AppError(400, 'You aren\'t following this user');
 	};
 
