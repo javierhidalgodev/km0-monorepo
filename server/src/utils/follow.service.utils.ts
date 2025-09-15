@@ -1,4 +1,4 @@
-import { FollowRequestResponseDTO } from '@/dtos/post-follow.dto';
+import { FollowRequestResponseDTO } from '@/dtos/follow.dto';
 import { IUser, UserModel } from '@/models/user.model';
 import { AppError } from './app-error';
 
