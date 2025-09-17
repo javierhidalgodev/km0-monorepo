@@ -169,6 +169,6 @@ describe('loginUser (mocked', () => {
 //         createUser(data);
 
 //         expect(() => createUser(data)).toThrow(AppError);
-//         expect(() => createUser(data)).toThrow('Email ya registrado');
+//         expect(() => createUser(data)).toThrow('This email is already in use');
 //     });
 // });

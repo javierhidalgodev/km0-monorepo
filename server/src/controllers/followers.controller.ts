@@ -1,6 +1,7 @@
 import { DeleteFollowerResponseDTO } from '@/dtos/followers.dto';
 import { deleteFollower } from '@/services/followers.service';
 import { AppError } from '@/utils/app-error';
+import { ensureAuthExists } from '@/utils/validation.utils';
 import { NextFunction, Request, Response } from 'express';
 
 export const handleDeleteFollower = async (
@@ -8,11 +9,7 @@ export const handleDeleteFollower = async (
     res: Response<DeleteFollowerResponseDTO>,
     next: NextFunction,
 ) => {
-    const user = req.user;
-
-    if (!user) {
-        throw new AppError(404, 'User not found');
-    };
+    const user = ensureAuthExists(req);
 
     const username = req.params.username;
 

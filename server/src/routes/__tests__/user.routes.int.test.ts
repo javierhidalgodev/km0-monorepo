@@ -58,7 +58,7 @@ describe('POST /api/users', () => {
             });
 
         expect(result.statusCode).toBe(409);
-        expect(result.body.message).toBe('Email ya registrado');
+        expect(result.body.message).toBe('This email is already in use');
     });
 });
 
@@ -96,7 +96,7 @@ describe('POST /api/login', () => {
             })
 
         expect(result.statusCode).toBe(401);
-        expect(result.body.message).toEqual('Credenciales incorrectas');
+        expect(result.body.message).toEqual('Invalid credentials');
     });
 
     it('login incorrecto con password incorrecta', async () => {
@@ -108,7 +108,7 @@ describe('POST /api/login', () => {
             })
 
         expect(result.statusCode).toBe(401);
-        expect(result.body.message).toEqual('Credenciales incorrectas');
+        expect(result.body.message).toEqual('Invalid credentials');
     });
 });
 

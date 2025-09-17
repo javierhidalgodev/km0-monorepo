@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { createUser, getProfile, getUsersFollowers, getUsersFollowing, loginUser, patchProfile } from '@/services/user.service';
 import { LoginRequestDTO, LoginResponseDTO, CreateUserRequestDTO, CreateUserResponseDTO, PatchProfileRequestDTO, PatchProfileResponseDTO, GetProfileResponseDTO, GetUsersFollowersResponseDTO, GetUsersFollowingResponseDTO } from '@/dtos/users.dto';
 import { AppError } from '@/utils/app-error';
+import { ensureAuthExists } from '@/utils/validation.utils';
 
 export const handleUserCreation = async (
     req: Request,
@@ -37,11 +38,7 @@ export const handleGetUsersFollowers = async (
     res: Response<GetUsersFollowersResponseDTO>,
     next: NextFunction
 ) => {
-    const user = req.user;
-
-    if (!user) {
-        throw new AppError(404, 'User not found');
-    };
+    const user = ensureAuthExists(req);
 
     const username = req.params.username;
 
@@ -59,11 +56,7 @@ export const handleGetUsersFollowing = async (
     res: Response<GetUsersFollowingResponseDTO>,
     next: NextFunction
 ) => {
-    const user = req.user;
-
-    if (!user) {
-        throw new AppError(404, 'User not found');
-    };
+    const user = ensureAuthExists(req);
 
     const username = req.params.username;
 

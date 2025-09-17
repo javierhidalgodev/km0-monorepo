@@ -4,10 +4,10 @@
  */
 
 import { CreateUserRequestDTO, CreateUserResponseDTO, LoginRequestDTO, LoginResponseDTO, PatchProfileRequestDTO, PatchProfileResponseDTO, GetProfileResponseDTO, GetUsersFollowersResponseDTO, GetUsersFollowingResponseDTO } from '@/dtos/users.dto';
-import { TPopulateFollowers, TPopulateFollowing, UserModel } from '@/models/user.model';
+import { IUser, TPopulateFollowers, TPopulateFollowing, UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
 import { comparePassword, generateToken, hashPassword } from '@/utils/auth';
-import { findUserByUsername } from '@/utils/user.service.utils';
+import { ensureUserExists, findUserByUsername } from '@/utils/user.service.utils';
 
 export const createUser = async (data: CreateUserRequestDTO): Promise<CreateUserResponseDTO> => {
     const { email, password } = data;
@@ -15,7 +15,7 @@ export const createUser = async (data: CreateUserRequestDTO): Promise<CreateUser
     const exists = await UserModel.findOne({ email });
 
     if (exists) {
-        throw new AppError(409, 'Email ya registrado');
+        throw new AppError(409, 'This email is already in use');
     };
 
     const hashedPassword = await hashPassword(password);
@@ -39,13 +39,13 @@ export const loginUser = async (data: LoginRequestDTO): Promise<LoginResponseDTO
     const user = await UserModel.findOne({ email: data.email });
 
     if (!user) {
-        throw new AppError(401, 'Credenciales incorrectas');
+        throw new AppError(401, 'Invalid credentials');
     };
 
     const isValid = await comparePassword(data.password, user.password);
 
     if (!isValid) {
-        throw new AppError(401, 'Credenciales incorrectas');
+        throw new AppError(401, 'Invalid credentials');
     };
 
     const token = generateToken(user);
@@ -64,17 +64,8 @@ export const loginUser = async (data: LoginRequestDTO): Promise<LoginResponseDTO
 export const getUsersFollowers = async (userID: string, username: string): Promise<GetUsersFollowersResponseDTO> => {
     const user = await findUserByUsername(username);
 
-    if (!user) {
-        throw new AppError(404, 'User not found');
-    };
-
-    const populateFollowerUser = await UserModel.findById(user.id)
-        .populate('followers', 'username bio followers following')
-        .lean<TPopulateFollowers>();
-
-    if (!populateFollowerUser) {
-        throw new AppError(404, 'User not found');
-    };
+    const populateFollowerUser = await user
+        .populate<TPopulateFollowers>('followers', 'username bio followers following');
 
     // Usuario privado y que no coincide con el ID del solicitante, contenido bloqueado
     if (!user.isPublic && userID !== user.id) {
@@ -98,17 +89,8 @@ export const getUsersFollowers = async (userID: string, username: string): Promi
 export const getUsersFollowing = async (userID: string, username: string): Promise<GetUsersFollowingResponseDTO> => {
     const user = await findUserByUsername(username);
 
-    if (!user) {
-        throw new AppError(404, 'User not found');
-    };
-
-    const populateFollowingUser = await UserModel.findById(user.id)
-        .populate('following', 'username bio followers following')
-        .lean<TPopulateFollowing>();
-
-    if (!populateFollowingUser) {
-        throw new AppError(404, 'User not found');
-    };
+    const populateFollowingUser = await user
+        .populate<TPopulateFollowing>('following', 'username bio followers following');
 
     // Usuario privado y que no coincide con el ID del solicitante, contenido bloqueado
     if (!user.isPublic && userID !== user.id) {
@@ -130,15 +112,11 @@ export const getUsersFollowing = async (userID: string, username: string): Promi
 };
 
 export const getProfile = async (username: string, userID?: string): Promise<GetProfileResponseDTO> => {
-    const userProfile = await UserModel.findOne({ username }).lean();
-
-    if (!userProfile) {
-        throw new AppError(404, 'User not found');
-    };
+    const userProfile = await findUserByUsername(username);
 
     // Si el perfil es privado
     // Si además el id del solicitante no es igual al del perfil solicitado
-    if (!userProfile.isPublic && userID != userProfile._id.toString()) {
+    if (!userProfile.isPublic && userID != userProfile.id.toString()) {
         return {
             status: 'ok',
             profile: {
@@ -147,7 +125,7 @@ export const getProfile = async (username: string, userID?: string): Promise<Get
         };
     };
 
-    if (userID == userProfile._id.toString()) {
+    if (userID == userProfile.id.toString()) {
         return {
             status: 'ok',
             profile: {
@@ -176,17 +154,15 @@ export const getProfile = async (username: string, userID?: string): Promise<Get
 };
 
 export const patchProfile = async (userID: string, data: PatchProfileRequestDTO): Promise<PatchProfileResponseDTO> => {
-    const updatedProfile = await UserModel.findByIdAndUpdate(userID, {
-        birthdate: data.birthdate,
-        bio: data.bio,
-        isPublic: data.isPublic,
-    }, {
-        new: true,
-    });
-
-    if (!updatedProfile) {
-        throw new AppError(404, 'User not found');
-    }
+    const updatedProfile = ensureUserExists(
+        await UserModel.findByIdAndUpdate<IUser>(userID, {
+            birthdate: data.birthdate,
+            bio: data.bio,
+            isPublic: data.isPublic,
+        }, {
+            new: true,
+        })
+    );
 
     return {
         status: 'updated',

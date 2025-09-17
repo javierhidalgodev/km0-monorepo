@@ -1,16 +1,13 @@
 import { GetCommentsResponseDTO, CreateCommentRequestDTO, CreateCommentResponseDTO, DeleteCommentResponseDTO, GetSingleCommentResponseDTO } from '@/dtos/comments.dto';
 import { CommentModel, IComment, PopulateComment } from '@/models/comment.model';
 import { PostModel } from '@/models/post.model';
-import { UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
 import { assertCanComment, mapComments } from '@/utils/comment.service.utils';
+import { findUserByID } from '@/utils/user.service.utils';
 
 export const createComment = async (userID: string, postID: string, data: CreateCommentRequestDTO): Promise<CreateCommentResponseDTO> => {
     // 1. La validación de usuario/token se hace con middleware // DEFENSIVO
-    const user = await UserModel.findById(userID);
-    if (!user) {
-        throw new AppError(404, 'User not found');
-    }
+    await findUserByID(userID);
 
     // 2. Aquí hago la validación de POST existente (DEFENSIVO)
     // y si el usuario puede comentarlo

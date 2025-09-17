@@ -2,7 +2,7 @@ import { FollowRequestResponseDTO, AcceptFollowRequestResponseDTO, RejectFollowR
 import { IUser, UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
 import { followPublicUser, requestToFollowPrivateUser } from '@/utils/follow.service.utils';
-import { findUserByUsername } from '@/utils/user.service.utils';
+import { ensureUserExists, findUserByID, findUserByUsername } from '@/utils/user.service.utils';
 
 export const followRequest = async (username: string, requestingUserID: string): Promise<FollowRequestResponseDTO> => {
 	const userToFollow = await findUserByUsername(username);
@@ -19,12 +19,8 @@ export const followRequest = async (username: string, requestingUserID: string):
 };
 
 export const acceptFollowRequest = async (userID: string, requestingUserID: string): Promise<AcceptFollowRequestResponseDTO> => {
-	const user = await UserModel.findById(userID);
-	const requestingUser = await UserModel.findById(requestingUserID);
-
-	if (!user || !requestingUser) {
-		throw new AppError(404, 'User not found');
-	};
+	const user = await findUserByID(userID);
+	const requestingUser = await findUserByID(requestingUserID);
 
 	if (user.followers.includes(requestingUserID)) {
 		throw new AppError(400, 'This user already follows you');
@@ -34,14 +30,12 @@ export const acceptFollowRequest = async (userID: string, requestingUserID: stri
 		throw new AppError(400, 'This user does not requested to follow you');
 	};
 
-	const updatedUser = await UserModel.findByIdAndUpdate(userID, {
-		$pull: { followRequests: requestingUserID },
-		$addToSet: { followers: requestingUserID },
-	}, { new: true });
-
-	if (!updatedUser) {
-		throw new AppError(404, 'User not found');
-	};
+	const updatedUser = ensureUserExists(
+		await UserModel.findByIdAndUpdate<IUser>(userID, {
+			$pull: { followRequests: requestingUserID },
+			$addToSet: { followers: requestingUserID },
+		}, { new: true })
+	);
 
 	await requestingUser.updateOne({
 		$addToSet: { following: userID },
@@ -60,12 +54,8 @@ export const acceptFollowRequest = async (userID: string, requestingUserID: stri
 };
 
 export const rejectFollowRequest = async (userID: string, requestingUserID: string): Promise<RejectFollowRequestResponseDTO> => {
-	const user = await UserModel.findById(userID);
-	const requestingUser = await UserModel.findById(requestingUserID);
-
-	if (!user || !requestingUser) {
-		throw new AppError(404, 'User not found');
-	};
+	const user = await findUserByID(userID);
+	const requestingUser = await findUserByID(requestingUserID);
 
 	if (user.followers.includes(requestingUserID)) {
 		throw new AppError(400, 'This user already follows you');
@@ -95,29 +85,19 @@ export type PopulateFollowRequestsUser = Omit<IUser, 'followRequests'> & ({
 });
 
 export const getFollowRequests = async (userID: string): Promise<GetFollowRequestsResponseDTO> => {
-	console.log(userID);
-	const user = await UserModel
-		.findById(userID)
-		.populate('followRequests', 'username bio isPublic')
-		.lean<PopulateFollowRequestsUser>();
+	const user = await findUserByID(userID);
 
-	if (!user) {
-		throw new AppError(404, 'User not found');
-	}
+	const populateUser = await user.populate<PopulateFollowRequestsUser>('followRequests', 'username bio isPublic');
 
 	return {
 		status: 'ok',
-		followRequests: user.followRequests,
+		followRequests: populateUser.followRequests,
 	}
 };
 
 export const deleteUnfollow = async (userID: string, username: string): Promise<DeleteUnfollowResponseDTO> => {
 	const userToUnfollow = await findUserByUsername(username);
-	const requestingUser = await UserModel.findById(userID);
-
-	if (!userToUnfollow || !requestingUser) {
-		throw new AppError(404, 'User not found');
-	};
+	const requestingUser = await findUserByID(userID);
 
 	if (!requestingUser.following.includes(userToUnfollow.id)) {
 		throw new AppError(400, 'You aren\'t following this user');
