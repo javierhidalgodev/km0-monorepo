@@ -1,18 +1,15 @@
 import { CreatePostRequestDTO, CreatePostResponseDTO, GetPostsResponseDTO, GetPostDetailResponseDTO, DeletePostResponseDTO } from '@/dtos/posts.dto';
 import { IPost, PopulatePost, PostModel } from '@/models/post.model';
-import { UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
 import { getMine, getPosts, mapPosts } from '@/utils/post.services.utils';
 import { IPostsQueryParams } from '@/schemas/post.schema';
 import { CommentModel, PopulateComment } from '@/models/comment.model';
 import { mapComments } from '@/utils/comment.service.utils';
+import { AUTH_ERRORS } from '@/constants/messages';
+import { findUserByID } from '@/utils/user.service.utils';
 
 export const createPost = async (userID: string, data: CreatePostRequestDTO): Promise<CreatePostResponseDTO> => {
-    const user = await UserModel.findById(userID);
-
-    if (!user) {
-        throw new AppError(404, 'Usuario no encontrado');
-    };
+    const user = await findUserByID(userID);
 
     const post = await PostModel.create({
         user: user.id,
@@ -72,7 +69,7 @@ export const getPostDetail = async (postID: string, userID?: string): Promise<Ge
     };
 
     if (!post.user.isPublic && (!userID || userID !== post.user._id.toString())) {
-        throw new AppError(403, 'Unauthorized');
+        throw new AppError(403, AUTH_ERRORS.UNAUTHORIZED_403);
     }
 
     const comments = await CommentModel.find({ post: post.id })

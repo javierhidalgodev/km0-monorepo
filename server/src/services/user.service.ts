@@ -3,6 +3,7 @@
  * que no dependa del framework (Express.js)
  */
 
+import { AUTH_ERRORS } from '@/constants/messages';
 import { CreateUserRequestDTO, CreateUserResponseDTO, LoginRequestDTO, LoginResponseDTO, PatchProfileRequestDTO, PatchProfileResponseDTO, GetProfileResponseDTO, GetUsersFollowersResponseDTO, GetUsersFollowingResponseDTO } from '@/dtos/users.dto';
 import { IUser, TPopulateFollowers, TPopulateFollowing, UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
@@ -39,13 +40,13 @@ export const loginUser = async (data: LoginRequestDTO): Promise<LoginResponseDTO
     const user = await UserModel.findOne({ email: data.email });
 
     if (!user) {
-        throw new AppError(401, 'Invalid credentials');
+        throw new AppError(401, AUTH_ERRORS.INVALID_CREDENTIALS);
     };
 
     const isValid = await comparePassword(data.password, user.password);
 
     if (!isValid) {
-        throw new AppError(401, 'Invalid credentials');
+        throw new AppError(401, AUTH_ERRORS.INVALID_CREDENTIALS);
     };
 
     const token = generateToken(user);
@@ -69,7 +70,7 @@ export const getUsersFollowers = async (userID: string, username: string): Promi
 
     // Usuario privado y que no coincide con el ID del solicitante, contenido bloqueado
     if (!user.isPublic && userID !== user.id) {
-        throw new AppError(403, 'Forbidden');
+        throw new AppError(403, AUTH_ERRORS.FORBIDDEN_403);
     }
 
     const formatted = populateFollowerUser.followers.map(f => ({
@@ -94,7 +95,7 @@ export const getUsersFollowing = async (userID: string, username: string): Promi
 
     // Usuario privado y que no coincide con el ID del solicitante, contenido bloqueado
     if (!user.isPublic && userID !== user.id) {
-        throw new AppError(403, 'Forbidden');
+        throw new AppError(403, AUTH_ERRORS.FORBIDDEN_403);
     }
 
     const formatted = populateFollowingUser.following.map(f => ({

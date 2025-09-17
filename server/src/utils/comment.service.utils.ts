@@ -2,6 +2,7 @@ import { PopulateComment } from '@/models/comment.model';
 import { PopulatePost, PostModel } from '@/models/post.model';
 import { AppError } from './app-error';
 import { MappedComment } from '@/dtos/comments.dto';
+import { AUTH_ERRORS } from '@/constants/messages';
 
 export const mapComments = (comments: PopulateComment[]): MappedComment[] => {
     return comments.map<MappedComment>((c: PopulateComment) => {
@@ -29,6 +30,6 @@ export const assertCanComment = async (postID: string, userID: string): Promise<
     }
 
     if (!post.user.isPublic && post.user._id.toString() !== userID) {
-        throw new AppError(403, 'Forbidden');
+        throw new AppError(403, AUTH_ERRORS.FORBIDDEN_403);
     }
 }

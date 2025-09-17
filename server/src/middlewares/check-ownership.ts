@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import { CommentModel } from '@/models/comment.model';
 import { PostModel } from '@/models/post.model';
 import { AppError } from '@/utils/app-error';
+import { AUTH_ERRORS } from '@/constants/messages';
 
 export type ParamIDKey = 'postID' | 'commentID'
 
@@ -16,7 +17,7 @@ export const checkOwnership = (paramIDKey: ParamIDKey): RequestHandler => {
             }
             
             if (post.user.toString() !== req.user!.id) {
-                throw new AppError(403, 'Unauthorized');
+                throw new AppError(403, AUTH_ERRORS.UNAUTHORIZED_403);
             }
             
             req.post = post;
@@ -30,7 +31,7 @@ export const checkOwnership = (paramIDKey: ParamIDKey): RequestHandler => {
             }
 
             if (comment.user.toString() !== req.user!.id) {
-                throw new AppError(403, 'Unauthorized');
+                throw new AppError(403, AUTH_ERRORS.UNAUTHORIZED_403);
             }
 
             req.comment = comment;

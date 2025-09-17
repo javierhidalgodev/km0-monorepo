@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { AppError } from '@/utils/app-error';
 import { IUser } from '@/models/user.model';
 import { TokenPayload } from '@/types/token-payload';
+import { AUTH_ERRORS } from '@/constants/messages';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'el_que_tengo_aqui_colgado';
 
@@ -56,7 +57,7 @@ export const verifyToken = (token: string) => {
  */
 export const extractUserFromAuthHeader = (authHeader?: string, required = false): TokenPayload | undefined => {
     if (!authHeader) {
-        if (required) throw new AppError(401, 'Invalid token');
+        if (required) throw new AppError(401, AUTH_ERRORS.INVALID_TOKEN);
         return;
     }
 
