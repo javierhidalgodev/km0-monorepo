@@ -129,6 +129,6 @@ describe('INVALID DELETE /api/followers/:username', () => {
 
         expect(response.status).toBe(400);
         expect(response.body.status).toBe('error');
-        expect(response.body.message).toBe('Cannot delete yourself, because you can\'t follow yourself');
+        expect(response.body.message).toBe('Cannot delete yourself, because you cannot follow yourself');
     });
 });

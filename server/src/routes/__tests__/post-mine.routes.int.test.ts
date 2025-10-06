@@ -63,14 +63,14 @@ describe('GET /api/posts/mine', () => {
         expect(response.body.posts[0].user.username).toBe('demo_user');
     });
 
-    it('Pasando un token caducado, 401 + \'Token inválido o caducado\'', async () => {
+    it('Pasando un token caducado, 401 + \'Invalid token\'', async () => {
         const response = await request(app)
             .get('/api/posts/mine')
             .auth('123', { type: 'bearer' });
 
         expect(response.statusCode).toBe(401);
         expect(response.body.status).toBe('error');
-        expect(response.body.message).toBe('Token inválido o caducado');
+        expect(response.body.message).toBe('Invalid token');
     })
 
     it('Un usuario recupera solo sus post', async () => {

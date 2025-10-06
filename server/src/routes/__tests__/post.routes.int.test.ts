@@ -142,7 +142,7 @@ describe('POST /api/posts', () => {
 
         expect(result.statusCode).toBe(401);
         expect(result.body.status).toBe('error');
-        expect(result.body.message).toBe('Token inválido o caducado');
+        expect(result.body.message).toBe('Invalid token');
     });
 });
 
@@ -329,13 +329,13 @@ describe('INVALID GET /api/posts', () => {
     //     expect(result.body.message).toBe('Invalid token');
     // });
 
-    it('Token inválido o caducado: 401 + \'Token inválido o caducado\'', async () => {
+    it('Invalid token: 401 + \'Invalid token\'', async () => {
         const result = await request(app)
             .get('/api/posts')
             .auth('asd', { type: 'bearer' });
 
         expect(result.statusCode).toBe(401);
-        expect(result.body.message).toBe('Token inválido o caducado');
+        expect(result.body.message).toBe('Invalid token');
     });
 });
 
