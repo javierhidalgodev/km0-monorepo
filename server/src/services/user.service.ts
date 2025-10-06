@@ -1,14 +1,9 @@
-/**
- * Lógica interna para la creación de un usuario
- * que no dependa del framework (Express.js)
- */
-
-import { AUTH_ERRORS } from '@/constants/messages';
-import { CreateUserRequestDTO, CreateUserResponseDTO, LoginRequestDTO, LoginResponseDTO, PatchProfileRequestDTO, PatchProfileResponseDTO, GetProfileResponseDTO, GetUsersFollowersResponseDTO, GetUsersFollowingResponseDTO } from '@/dtos/users.dto';
 import { IUser, TPopulateFollowers, TPopulateFollowing, UserModel } from '@/models/user.model';
+import { CreateUserRequestDTO, CreateUserResponseDTO, LoginRequestDTO, LoginResponseDTO, PatchProfileRequestDTO, PatchProfileResponseDTO, GetProfileResponseDTO, GetUsersFollowersResponseDTO, GetUsersFollowingResponseDTO } from '@/dtos/users.dto';
 import { AppError } from '@/utils/app-error';
 import { comparePassword, generateToken, hashPassword } from '@/utils/auth';
 import { ensureUserExists, findUserByUsername } from '@/utils/user.service.utils';
+import { AUTH_ERRORS } from '@/constants/messages';
 
 export const createUser = async (data: CreateUserRequestDTO): Promise<CreateUserResponseDTO> => {
     const { email, password } = data;
@@ -16,7 +11,7 @@ export const createUser = async (data: CreateUserRequestDTO): Promise<CreateUser
     const exists = await UserModel.findOne({ email });
 
     if (exists) {
-        throw new AppError(409, 'This email is already in use');
+        throw new AppError(409, AUTH_ERRORS.EMAIL_IN_USE);
     };
 
     const hashedPassword = await hashPassword(password);
@@ -115,8 +110,7 @@ export const getUsersFollowing = async (userID: string, username: string): Promi
 export const getProfile = async (username: string, userID?: string): Promise<GetProfileResponseDTO> => {
     const userProfile = await findUserByUsername(username);
 
-    // Si el perfil es privado
-    // Si además el id del solicitante no es igual al del perfil solicitado
+    // Perfil privado solicitado por usuario NO propietario
     if (!userProfile.isPublic && userID != userProfile.id.toString()) {
         return {
             status: 'ok',
@@ -126,16 +120,21 @@ export const getProfile = async (username: string, userID?: string): Promise<Get
         };
     };
 
+    const profile = {
+        username: userProfile.username,
+        email: userProfile.email,
+        birthdate: userProfile.birthdate,
+        bio: userProfile.bio,
+        followers: userProfile.followers.length,
+        following: userProfile.following.length,
+    }
+
+    // Perfil privado solicitado por usuario propietario
     if (userID == userProfile.id.toString()) {
         return {
             status: 'ok',
             profile: {
-                username: userProfile.username,
-                email: userProfile.email,
-                birthdate: userProfile.birthdate,
-                bio: userProfile.bio,
-                followers: userProfile.followers.length,
-                following: userProfile.following.length,
+                ...profile,
                 followRequests: userProfile.followRequests,
             }
         };
@@ -143,14 +142,7 @@ export const getProfile = async (username: string, userID?: string): Promise<Get
 
     return {
         status: 'ok',
-        profile: {
-            username: userProfile.username,
-            email: userProfile.email,
-            birthdate: userProfile.birthdate,
-            bio: userProfile.bio,
-            followers: userProfile.followers.length,
-            following: userProfile.following.length,
-        }
+        profile,
     };
 };
 
