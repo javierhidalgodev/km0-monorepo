@@ -1,10 +1,22 @@
-import { PostResponseDTO } from '@/dtos/get-post.dto';
+import { PostResponseDTO } from '@/dtos/posts.dto';
 import { IPost, PopulatePost, PostModel } from '@/models/post.model';
 import { IPostsQueryParams } from '@/schemas/post.schema';
 import { FilterQuery, Query } from 'mongoose';
+import { AppError } from './app-error';
+import { POST_ERRORS } from '@/constants/messages';
 
 export interface PostFilter extends IPostsQueryParams {
     user?: string;
+}
+
+export const findPostByID = async (postID: string): Promise<IPost> => {
+    const post = await PostModel.findById(postID);
+
+    if (!post) {
+        throw new AppError(404, POST_ERRORS.NOT_FOUND);
+    };
+
+    return post;
 }
 
 export const getPosts = async (
@@ -44,7 +56,7 @@ export const mapPosts = (posts: PopulatePost[]): PostResponseDTO[] => {
     // const publicPosts = posts.filter(p => p.isPublic);
 
     return posts.map((p: PopulatePost) => ({
-        id: p.id,
+        id: p._id.toString(),
         user: {
             id: p.user._id,
             username: p.user.username,

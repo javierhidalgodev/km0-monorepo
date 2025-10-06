@@ -1,25 +1,20 @@
-import { FollowRequestResponseDTO } from '@/dtos/post-follow.dto';
-import { AcceptFollowRequestResponseDTO } from '@/dtos/patch-follow-request-accept.dto';
+import { FollowRequestResponseDTO, AcceptFollowRequestResponseDTO, RejectFollowRequestResponseDTO, DeleteUnfollowResponseDTO, GetFollowRequestsResponseDTO } from '@/dtos/follow.dto';
 import { acceptFollowRequest, deleteUnfollow, followRequest, getFollowRequests, rejectFollowRequest } from '@/services/follow.service';
 import { AppError } from '@/utils/app-error';
+import { ensureAuthExists } from '@/utils/validation.utils';
 import { NextFunction, Request, Response } from 'express';
-import { RejectFollowRequestResponseDTO } from '@/dtos/patch-follow-request-reject.dto';
-import { GetFollowRequestsResponseDTO } from '@/dtos/get-follow-requests.dto';
-import { DeleteUnfollowResponseDTO } from '@/dtos/delete-unfollow.dto';
 
 export const handleFollowRequest = async (
 	req: Request,
 	res: Response<FollowRequestResponseDTO>,
 	next: NextFunction,
 ) => {
-	if (!req.user) {
-		throw new AppError(401, 'Invalid token');
-	}
+	const user = ensureAuthExists(req);
 
 	const username = req.params.username;
 
 	try {
-		const response = await followRequest(username, req.user.id);
+		const response = await followRequest(username, user.id);
 
 		res.status(200).json(response);
 	} catch (error) {
@@ -32,9 +27,7 @@ export const handleAcceptFollowRequest = async (
 	res: Response<AcceptFollowRequestResponseDTO>,
 	next: NextFunction,
 ) => {
-	if (!req.user) {
-		throw new AppError(401, 'Invalid token');
-	}
+	const user = ensureAuthExists(req);
 
 	// En realidad se puede pasar por el middleware de ObjectID
 	const requestingUserID = req.params.requestingUserID;
@@ -45,7 +38,7 @@ export const handleAcceptFollowRequest = async (
 	// };
 
 	try {
-		const response = await acceptFollowRequest(req.user.id, requestingUserID);
+		const response = await acceptFollowRequest(user.id, requestingUserID);
 
 		res.status(200).json(response);
 	} catch (error) {
@@ -58,9 +51,7 @@ export const handleRejectFollowRequest = async (
 	res: Response<RejectFollowRequestResponseDTO>,
 	next: NextFunction,
 ) => {
-	if (!req.user) {
-		throw new AppError(401, 'Invalid token');
-	}
+	const user = ensureAuthExists(req);
 
 	// En realidad se puede pasar por el middleware de ObjectID
 	const requestingUserID = req.params.requestingUserID;
@@ -71,7 +62,7 @@ export const handleRejectFollowRequest = async (
 	// };
 
 	try {
-		const response = await rejectFollowRequest(req.user.id, requestingUserID);
+		const response = await rejectFollowRequest(user.id, requestingUserID);
 
 		res.status(200).json(response);
 	} catch (error) {
@@ -84,12 +75,10 @@ export const handleGetFollowRequests = async (
 	res: Response<GetFollowRequestsResponseDTO>,
 	next: NextFunction,
 ) => {
-	if (!req.user) {
-		throw new AppError(401, 'Invalid token');
-	};
+	const user = ensureAuthExists(req);
 
 	try {
-		const response = await getFollowRequests(req.user.id);
+		const response = await getFollowRequests(user.id);
 
 		res.status(200).json(response);
 	} catch (error) {
@@ -102,14 +91,12 @@ export const handleUnfollowRequest = async (
 	res: Response<DeleteUnfollowResponseDTO>,
 	next: NextFunction,
 ) => {
-	if (!req.user) {
-		throw new AppError(401, 'Invalid token');
-	};
+	const user = ensureAuthExists(req);
 
 	const username = req.params.username;
 
 	try {
-		const response = await deleteUnfollow(req.user.id, username);
+		const response = await deleteUnfollow(user.id, username);
 
 		res.status(200).json(response);
 	} catch (error) {

@@ -1,5 +1,4 @@
-import { PopulateFollower } from '@/dtos/get-users-followers.dto';
-import { PopulateFollowing } from '@/dtos/get-users-following.dto';
+import { PopulateUser } from '@/dtos/users.dto';
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
@@ -15,11 +14,11 @@ export interface IUser extends Document {
 };
 
 export type TPopulateFollowers = Omit<IUser, 'followers'> & ({
-    followers: PopulateFollower[];
+    followers: PopulateUser[];
 });
 
 export type TPopulateFollowing = Omit<IUser, 'following'> & ({
-    following: PopulateFollowing[];
+    following: PopulateUser[];
 });
 
 const UserSchema = new Schema<IUser>({

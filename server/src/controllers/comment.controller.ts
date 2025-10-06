@@ -1,26 +1,21 @@
 import { NextFunction, Request, Response } from 'express';
 import { AppError } from '@/utils/app-error';
 import { createComment, deletePostComment, getCommentById, getPostComments } from '@/services/comment.service';
-import { CreateCommentResponseDTO } from '@/dtos/create-comment.dto';
-import { GetCommentResponseDTO, GetCommentsResponseDTO } from '@/dtos/get-comments.dto';
-import { DeleteCommentResponseDTO } from '@/dtos/delete-comment.dto';
+import { CreateCommentResponseDTO, GetCommentsResponseDTO, DeleteCommentResponseDTO, GetSingleCommentResponseDTO } from '@/dtos/comments.dto';
+import { ensureAuthExists } from '@/utils/validation.utils';
+import { COMMENT_ERRORS } from '@/constants/messages';
 
 export const handleCommentCreation = async (
     req: Request,
     res: Response<CreateCommentResponseDTO>,
     next: NextFunction,
 ) => {
-    const token = req.user;
-
-    // Defensivo
-    if (!token) {
-        return next(new AppError(401, 'Invalid token'));
-    };
+    const user = ensureAuthExists(req);
 
     const postID = req.params.postID;
 
     try {
-        const response = await createComment(token.id, postID, req.body);
+        const response = await createComment(user.id, postID, req.body);
 
         res.status(201).json(response);
     } catch (error) {
@@ -30,7 +25,7 @@ export const handleCommentCreation = async (
 
 export const handleGetComment = async (
     req: Request,
-    res: Response<GetCommentResponseDTO>,
+    res: Response<GetSingleCommentResponseDTO>,
     next: NextFunction,
 ) => {
     const commentID = req.params.commentID;
@@ -65,15 +60,11 @@ export const handleDeleteComment = async (
     res: Response<DeleteCommentResponseDTO>,
     next: NextFunction,
 ) => {
-    const tokenPayload = req.user;
+    ensureAuthExists(req);
     const comment = req.comment;
 
-    if (!tokenPayload) {
-        return next(new AppError(401, 'Invalid token'));
-    };
-
     if (!comment) {
-        throw new AppError(404, 'Comment not found');
+        throw new AppError(404, COMMENT_ERRORS.NOT_FOUND);
     };
 
     try {

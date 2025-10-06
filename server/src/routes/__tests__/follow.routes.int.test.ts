@@ -495,7 +495,7 @@ describe('DELETE unfollow request', () => {
 
         expect(response.status).toBe(400);
         expect(response.body.status).toBe('error');
-        expect(response.body.message).toBe('You aren\'t following this user');
+        expect(response.body.message).toBe('You are not following this user');
     });
 
     it('Intentar dejar de seguir a un usuario que no existe', async () => {

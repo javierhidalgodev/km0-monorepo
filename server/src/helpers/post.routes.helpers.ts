@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '@/app';
 import { TActivity, TMood } from '@/models/post.model';
-import { CreatePostResponseDTO } from '@/dtos/create-post.dto';
+import { CreatePostResponseDTO } from '@/dtos/posts.dto';
 
 export const createPost = async (token: string):  Promise<CreatePostResponseDTO> => {
     const result = await request(app)

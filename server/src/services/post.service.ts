@@ -1,21 +1,15 @@
-import { CreatePostRequestDTO, CreatePostResponseDTO } from '@/dtos/create-post.dto';
-import { GetPostsResponseDTO } from '@/dtos/get-post.dto';
 import { IPost, PopulatePost, PostModel } from '@/models/post.model';
-import { UserModel } from '@/models/user.model';
-import { AppError } from '@/utils/app-error';
-import { getMine, getPosts, mapPosts, PostFilter } from '@/utils/post.services.utils';
-import { IPostsQueryParams } from '@/schemas/post.schema';
-import { DeletePostResponseDTO } from '@/dtos/delete-post.dto';
-import { GetPostDetailResponseDTO } from '@/dtos/get-post-detail.dto';
 import { CommentModel, PopulateComment } from '@/models/comment.model';
+import { IPostsQueryParams } from '@/schemas/post.schema';
+import { CreatePostRequestDTO, CreatePostResponseDTO, GetPostsResponseDTO, GetPostDetailResponseDTO, DeletePostResponseDTO } from '@/dtos/posts.dto';
+import { findPostByID, getMine, getPosts, mapPosts } from '@/utils/post.services.utils';
+import { AppError } from '@/utils/app-error';
 import { mapComments } from '@/utils/comment.service.utils';
+import { findUserByID } from '@/utils/user.service.utils';
+import { AUTH_ERRORS } from '@/constants/messages';
 
 export const createPost = async (userID: string, data: CreatePostRequestDTO): Promise<CreatePostResponseDTO> => {
-    const user = await UserModel.findById(userID);
-
-    if (!user) {
-        throw new AppError(404, 'Usuario no encontrado');
-    };
+    const user = await findUserByID(userID);
 
     const post = await PostModel.create({
         user: user.id,
@@ -43,6 +37,7 @@ export const getAllPosts = async (
     userID?: string
 ): Promise<GetPostsResponseDTO> => {
     const posts = await getPosts(queryParams, userID);
+
     const mappedPosts = mapPosts(posts);
 
     return {
@@ -51,7 +46,6 @@ export const getAllPosts = async (
     };
 }
 
-// TODO: revisar que funcione bien para traer todos los posts propios
 export const getPostsMine = async (
     userID: string,
     queryParams?: IPostsQueryParams
@@ -67,15 +61,12 @@ export const getPostsMine = async (
 };
 
 export const getPostDetail = async (postID: string, userID?: string): Promise<GetPostDetailResponseDTO> => {
-    const post = await PostModel.findById(postID)
-        .populate<PopulatePost>('user', 'username isPublic');
+    const post = await findPostByID(postID)
 
-    if (!post) {
-        throw new AppError(404, 'Post not found');
-    };
+    const populatePost = await post.populate<PopulatePost>('user', 'username isPublic');
 
-    if (!post.user.isPublic && (!userID || userID !== post.user._id.toString())) {
-        throw new AppError(403, 'Unauthorized');
+    if (!populatePost.user.isPublic && (!userID || userID !== populatePost.user._id.toString())) {
+        throw new AppError(403, AUTH_ERRORS.UNAUTHORIZED_403);
     }
 
     const comments = await CommentModel.find({ post: post.id })
@@ -85,21 +76,18 @@ export const getPostDetail = async (postID: string, userID?: string): Promise<Ge
     const mappedComments = mapComments(comments);
 
     return {
-        id: post.id,
+        id: populatePost.id,
         user: {
-            id: post.user._id.toString(),
-            username: post.user.username,
+            id: populatePost.user._id.toString(),
+            username: populatePost.user.username,
         },
-        text: post.text,
-        activity: post.activity,
-        mood: post.mood,
+        text: populatePost.text,
+        activity: populatePost.activity,
+        mood: populatePost.mood,
         comments: mappedComments,
-        createdAt: post.createdAt,
+        createdAt: populatePost.createdAt,
     };
 };
-
-// Mine
-// export const getPostMineDetail
 
 export const deletePost = async (post: IPost): Promise<DeletePostResponseDTO> => {
     await post.deleteOne();
