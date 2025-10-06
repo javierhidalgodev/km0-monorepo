@@ -1,9 +1,9 @@
-import { FOLLOW_ERRORS } from '@/constants/messages';
-import { FollowRequestResponseDTO, AcceptFollowRequestResponseDTO, RejectFollowRequestResponseDTO, DeleteUnfollowResponseDTO, GetFollowRequestsResponseDTO } from '@/dtos/follow.dto';
 import { IUser, UserModel } from '@/models/user.model';
-import { AppError } from '@/utils/app-error';
+import { FollowRequestResponseDTO, AcceptFollowRequestResponseDTO, RejectFollowRequestResponseDTO, DeleteUnfollowResponseDTO, GetFollowRequestsResponseDTO } from '@/dtos/follow.dto';
 import { followPublicUser, requestToFollowPrivateUser } from '@/utils/follow.service.utils';
 import { ensureUserExists, findUserByID, findUserByUsername } from '@/utils/user.service.utils';
+import { AppError } from '@/utils/app-error';
+import { FOLLOW_ERRORS } from '@/constants/messages';
 
 export const followRequest = async (username: string, requestingUserID: string): Promise<FollowRequestResponseDTO> => {
 	const userToFollow = await findUserByUsername(username);
@@ -107,6 +107,7 @@ export const deleteUnfollow = async (userID: string, username: string): Promise<
 	await requestingUser.updateOne({
 		$pull: { following: userToUnfollow.id }
 	});
+	
 	await userToUnfollow.updateOne({
 		$pull: { followers: userID }
 	});
