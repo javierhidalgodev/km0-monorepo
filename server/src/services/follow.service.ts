@@ -1,3 +1,4 @@
+import { FOLLOW_ERRORS } from '@/constants/messages';
 import { FollowRequestResponseDTO, AcceptFollowRequestResponseDTO, RejectFollowRequestResponseDTO, DeleteUnfollowResponseDTO, GetFollowRequestsResponseDTO } from '@/dtos/follow.dto';
 import { IUser, UserModel } from '@/models/user.model';
 import { AppError } from '@/utils/app-error';
@@ -8,7 +9,7 @@ export const followRequest = async (username: string, requestingUserID: string):
 	const userToFollow = await findUserByUsername(username);
 
 	if (userToFollow.id === requestingUserID) {
-		throw new AppError(400, 'Cannot follow yourself');
+		throw new AppError(400, FOLLOW_ERRORS.CANNOT_FOLLOW_YOURSELF);
 	};
 
 	if (!userToFollow.isPublic) {
@@ -23,11 +24,11 @@ export const acceptFollowRequest = async (userID: string, requestingUserID: stri
 	const requestingUser = await findUserByID(requestingUserID);
 
 	if (user.followers.includes(requestingUserID)) {
-		throw new AppError(400, 'This user already follows you');
+		throw new AppError(400, FOLLOW_ERRORS.ALREADY_FOLLOW);
 	};
 
 	if (!user.followRequests.includes(requestingUserID)) {
-		throw new AppError(400, 'This user does not requested to follow you');
+		throw new AppError(400, FOLLOW_ERRORS.NO_REQUESTED_TO_FOLLOW);
 	};
 
 	const updatedUser = ensureUserExists(
@@ -58,11 +59,11 @@ export const rejectFollowRequest = async (userID: string, requestingUserID: stri
 	const requestingUser = await findUserByID(requestingUserID);
 
 	if (user.followers.includes(requestingUserID)) {
-		throw new AppError(400, 'This user already follows you');
+		throw new AppError(400, FOLLOW_ERRORS.ALREADY_FOLLOW);
 	};
 
 	if (!user.followRequests.includes(requestingUserID)) {
-		throw new AppError(400, 'This user does not requested to follow you');
+		throw new AppError(400, FOLLOW_ERRORS.NO_REQUESTED_TO_FOLLOW);
 	};
 
 	await user.updateOne({
@@ -100,7 +101,7 @@ export const deleteUnfollow = async (userID: string, username: string): Promise<
 	const requestingUser = await findUserByID(userID);
 
 	if (!requestingUser.following.includes(userToUnfollow.id)) {
-		throw new AppError(400, 'You aren\'t following this user');
+		throw new AppError(400, FOLLOW_ERRORS.NOT_FOLLOWING);
 	};
 
 	await requestingUser.updateOne({

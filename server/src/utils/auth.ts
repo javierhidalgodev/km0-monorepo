@@ -21,7 +21,7 @@ export const comparePassword = async (password: string, hash: string): Promise<b
     try {
         return await bcrypt.compare(password, hash);
     } catch (error) {
-        throw new AppError(500, 'Error al comparar contraseñas');
+        throw new AppError(500, 'Passwords do not match');
     }
 }
 
@@ -45,7 +45,7 @@ export const verifyToken = (token: string) => {
     try {
         return jwt.verify(processedToken[1], JWT_SECRET) as TokenPayload;
     } catch (error) {
-        throw new AppError(401, 'Token inválido o caducado');
+        throw new AppError(401, AUTH_ERRORS.INVALID_TOKEN);
     }
 }
 

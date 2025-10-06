@@ -1,9 +1,10 @@
-import { GetCommentsResponseDTO, CreateCommentRequestDTO, CreateCommentResponseDTO, DeleteCommentResponseDTO, GetSingleCommentResponseDTO } from '@/dtos/comments.dto';
 import { CommentModel, IComment, PopulateComment } from '@/models/comment.model';
-import { PostModel } from '@/models/post.model';
+import { GetCommentsResponseDTO, CreateCommentRequestDTO, CreateCommentResponseDTO, DeleteCommentResponseDTO, GetSingleCommentResponseDTO } from '@/dtos/comments.dto';
 import { AppError } from '@/utils/app-error';
 import { assertCanComment, mapComments } from '@/utils/comment.service.utils';
+import { findPostByID } from '@/utils/post.services.utils';
 import { findUserByID } from '@/utils/user.service.utils';
+import { COMMENT_ERRORS } from '@/constants/messages';
 
 export const createComment = async (userID: string, postID: string, data: CreateCommentRequestDTO): Promise<CreateCommentResponseDTO> => {
     // 1. La validación de usuario/token se hace con middleware // DEFENSIVO
@@ -38,8 +39,9 @@ export const getCommentById = async (commentID: string): Promise<GetSingleCommen
         .populate('user', 'username')
         .lean<PopulateComment>();
 
+    // TODO: Solo aparece una vez, no habría porqué sacarlo de momento
     if (!comment) {
-        throw new AppError(404, 'Comment not found');
+        throw new AppError(404, COMMENT_ERRORS.NOT_FOUND);
     };
 
     const mapComment = mapComments([comment])[0];
@@ -51,11 +53,7 @@ export const getCommentById = async (commentID: string): Promise<GetSingleCommen
 };
 
 export const getPostComments = async (postID: string): Promise<GetCommentsResponseDTO> => {
-    const post = await PostModel.findById(postID);
-
-    if (!post) {
-        throw new AppError(404, 'Post not found');
-    };
+    await findPostByID(postID);
 
     const comments = await CommentModel
         .find({ post: postID })

@@ -1,7 +1,8 @@
 import { PopulateComment } from '@/models/comment.model';
-import { PopulatePost, PostModel } from '@/models/post.model';
-import { AppError } from './app-error';
+import { PopulatePost } from '@/models/post.model';
 import { MappedComment } from '@/dtos/comments.dto';
+import { findPostByID } from './post.services.utils';
+import { AppError } from '@/utils/app-error';
 import { AUTH_ERRORS } from '@/constants/messages';
 
 export const mapComments = (comments: PopulateComment[]): MappedComment[] => {
@@ -20,16 +21,12 @@ export const mapComments = (comments: PopulateComment[]): MappedComment[] => {
 };
 
 export const assertCanComment = async (postID: string, userID: string): Promise<void> => {
-    const post = await PostModel
-        .findById(postID)
-        .populate('user', 'isPublic')
-        .lean<PopulatePost>();
+    const post = await findPostByID(postID);
 
-    if (!post) {
-        throw new AppError(404, 'Post not found');
-    }
+    const populatePost = await post
+        .populate<PopulatePost>('user', 'isPublic');
 
-    if (!post.user.isPublic && post.user._id.toString() !== userID) {
+    if (!populatePost.user.isPublic && populatePost.user._id.toString() !== userID) {
         throw new AppError(403, AUTH_ERRORS.FORBIDDEN_403);
     }
 }

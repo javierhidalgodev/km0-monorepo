@@ -4,6 +4,7 @@ export type TMood = 'excellent' | 'good' | 'regular' | 'bad';
 export type TActivity = 'run' | 'walk' | 'other'
 
 export interface IPost extends Document {
+    _id: Types.ObjectId;
     user: Types.ObjectId;
     createdAt: Date;
     activity: TActivity;

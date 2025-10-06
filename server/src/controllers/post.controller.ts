@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { createPost, deletePost, getAllPosts, getPostDetail, getPostsMine } from '@/services/post.service';
 import { AppError } from '@/utils/app-error';
 import { CreatePostResponseDTO, GetPostsResponseDTO, GetPostDetailResponseDTO, DeletePostResponseDTO } from '@/dtos/posts.dto';
+import { ensureAuthExists } from '@/utils/validation.utils';
+import { POST_ERRORS } from '@/constants/messages';
 
 export const handlePostCreation = async (
     req: Request,
@@ -74,15 +76,12 @@ export const handleDeletePost = async (
     res: Response<DeletePostResponseDTO>,
     next: NextFunction,
 ) => {
+    ensureAuthExists(req);
     const post = req.post;
-    const tokenPayload = req.user;
 
-    if (!tokenPayload) {
-        return next(new AppError(401, 'Invalid token'));
-    };
-
+    // TODO: revisar por que se alamacena en req el post
     if (!post) {
-        throw new AppError(404, 'Post not found');
+        throw new AppError(404, POST_ERRORS.NOT_FOUND);
     }
 
     try {
