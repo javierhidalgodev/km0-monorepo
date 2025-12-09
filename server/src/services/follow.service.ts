@@ -1,7 +1,7 @@
 import { IUser, UserModel } from '@/models/user.model';
 import { FollowRequestResponseDTO, AcceptFollowRequestResponseDTO, RejectFollowRequestResponseDTO, DeleteUnfollowResponseDTO, GetFollowRequestsResponseDTO } from '@/dtos/follow.dto';
-import { followPublicUser, requestToFollowPrivateUser } from '@/utils/follow.service.utils';
-import { ensureUserExists, findUserByID, findUserByUsername } from '@/utils/user.service.utils';
+import { followPublicUser, requestToFollowPrivateUser } from '@/utils/follow.utils';
+import { ensureUserExists, findUserByID, findUserByUsername } from '@/utils/user.utils';
 import { AppError } from '@/utils/app-error';
 import { FOLLOW_ERRORS } from '@/constants/messages';
 

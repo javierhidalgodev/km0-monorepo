@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 import { CommentModel } from '@/models/comment.model';
 import { AppError } from '@/utils/app-error';
 import { AUTH_ERRORS, COMMENT_ERRORS } from '@/constants/messages';
-import { findPostByID } from '@/utils/post.services.utils';
+import { findPostByID } from '@/utils/post.utils';
 
 export type ParamIDKey = 'postID' | 'commentID'
 

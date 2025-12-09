@@ -1,9 +1,9 @@
 import { CommentModel, IComment, PopulateComment } from '@/models/comment.model';
 import { GetCommentsResponseDTO, CreateCommentRequestDTO, CreateCommentResponseDTO, DeleteCommentResponseDTO, GetSingleCommentResponseDTO } from '@/dtos/comments.dto';
 import { AppError } from '@/utils/app-error';
-import { assertCanComment, mapComments } from '@/utils/comment.service.utils';
-import { findPostByID } from '@/utils/post.services.utils';
-import { findUserByID } from '@/utils/user.service.utils';
+import { assertCanComment, mapComments } from '@/utils/comment.utils';
+import { findPostByID } from '@/utils/post.utils';
+import { findUserByID } from '@/utils/user.utils';
 import { COMMENT_ERRORS } from '@/constants/messages';
 
 export const createComment = async (userID: string, postID: string, data: CreateCommentRequestDTO): Promise<CreateCommentResponseDTO> => {

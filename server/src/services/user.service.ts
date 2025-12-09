@@ -1,8 +1,8 @@
 import { IUser, TPopulateFollowers, TPopulateFollowing, UserModel } from '@/models/user.model';
 import { CreateUserRequestDTO, CreateUserResponseDTO, LoginRequestDTO, LoginResponseDTO, PatchProfileRequestDTO, PatchProfileResponseDTO, GetProfileResponseDTO, GetUsersFollowersResponseDTO, GetUsersFollowingResponseDTO } from '@/dtos/users.dto';
 import { AppError } from '@/utils/app-error';
-import { comparePassword, generateToken, hashPassword } from '@/utils/auth';
-import { ensureUserExists, findUserByUsername } from '@/utils/user.service.utils';
+import { comparePassword, generateToken, hashPassword } from '@/utils/auth.utils';
+import { ensureUserExists, findUserByUsername } from '@/utils/user.utils';
 import { AUTH_ERRORS } from '@/constants/messages';
 
 export const createUser = async (data: CreateUserRequestDTO): Promise<CreateUserResponseDTO> => {
@@ -60,13 +60,13 @@ export const loginUser = async (data: LoginRequestDTO): Promise<LoginResponseDTO
 export const getUsersFollowers = async (userID: string, username: string): Promise<GetUsersFollowersResponseDTO> => {
     const user = await findUserByUsername(username);
 
-    const populateFollowerUser = await user
-        .populate<TPopulateFollowers>('followers', 'username bio followers following');
-
     // Usuario privado y que no coincide con el ID del solicitante, contenido bloqueado
     if (!user.isPublic && userID !== user.id) {
         throw new AppError(403, AUTH_ERRORS.FORBIDDEN_403);
     }
+
+    const populateFollowerUser = await user
+        .populate<TPopulateFollowers>('followers', 'username bio followers following');
 
     const formatted = populateFollowerUser.followers.map(f => ({
         id: f.id,
@@ -125,8 +125,8 @@ export const getProfile = async (username: string, userID?: string): Promise<Get
         email: userProfile.email,
         birthdate: userProfile.birthdate,
         bio: userProfile.bio,
-        followers: userProfile.followers.length,
-        following: userProfile.following.length,
+        followers: userProfile.followers?.length,
+        following: userProfile.following?.length,
     }
 
     // Perfil privado solicitado por usuario propietario

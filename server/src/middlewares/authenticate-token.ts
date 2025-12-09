@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { extractUserFromAuthHeader } from '@/utils/auth';
+import { extractUserFromAuthHeader } from '@/utils/auth.utils';
 
 export const authenticateToken =
     (): RequestHandler => {
