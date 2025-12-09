@@ -2,7 +2,7 @@ import { FollowRequestResponseDTO } from '@/dtos/follow.dto';
 import { IUser } from '@/models/user.model';
 import { AppError } from './app-error';
 import { FOLLOW_ERRORS } from '@/constants/messages';
-import { findUserByID } from './user.service.utils';
+import { findUserByID } from './user.utils';
 
 export const requestToFollowPrivateUser = async (userToFollow: IUser, requestingUserID: string): Promise<FollowRequestResponseDTO> => {
 	// Si tiene petición pendiente

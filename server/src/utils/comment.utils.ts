@@ -1,7 +1,7 @@
 import { PopulateComment } from '@/models/comment.model';
 import { PopulatePost } from '@/models/post.model';
 import { MappedComment } from '@/dtos/comments.dto';
-import { findPostByID } from './post.services.utils';
+import { findPostByID } from './post.utils';
 import { AppError } from '@/utils/app-error';
 import { AUTH_ERRORS } from '@/constants/messages';
 
