@@ -6,8 +6,8 @@ import { ensureUserExists, findUserByUsername } from '@/utils/user.utils';
 import { AUTH_ERRORS } from '@/constants/messages';
 
 jest.mock('@/models/user.model');
-jest.mock('@/utils/auth');
-jest.mock('@/utils/user.service.utils');
+jest.mock('@/utils/auth.utils');
+jest.mock('@/utils/user.utils');
 
 const mockFindOne = UserModel.findOne as jest.Mock;
 const mockFindByIdAndUpdate = UserModel.findByIdAndUpdate as jest.Mock;
