@@ -41,9 +41,11 @@ export const handleGetUsersFollowers = async (
     const user = ensureAuthExists(req);
 
     const username = req.params.username;
+    const limit = req.query.limit?.toString();
+    const cursor = req.query.cursor?.toString();
 
     try {
-        const response = await getUsersFollowers(user.id, username);
+        const response = await getUsersFollowers(user.id, username, limit, cursor);
 
         res.status(200).json(response);
     } catch (error) {

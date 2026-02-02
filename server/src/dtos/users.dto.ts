@@ -68,6 +68,7 @@ export interface GetUsersFollowersResponseDTO {
         followers: number,
         following: number,
     }[];
+    nextCursor?: string;
 };
 
 export interface GetUsersFollowingResponseDTO {
