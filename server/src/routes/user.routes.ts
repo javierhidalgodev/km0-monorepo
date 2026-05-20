@@ -37,7 +37,8 @@ userRoutes.get(
 userRoutes.get(
     '/:username/following',
     authenticateToken(),
-    validate(paramsUsernameSchema, 'params'),
+    validateParams(paramsUsernameSchema),
+    validateQuery(queryFollowersPaginationSchema),
     handleGetUsersFollowing,
 );
 
