@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { handleGetProfile, handleGetUsersFollowers, handleGetUsersFollowing, handlePatchProfile, handleUserCreation, handleUserLogin } from '@/controllers/user.controller';
-import { validate, validateBody } from '@/middlewares/validate';
+import { validate, validateBody, validateParams, validateQuery } from '@/middlewares/validate';
 import { createUserSchema, loginSchema, patchProfileSchema } from '@/schemas/user.schema';
 import { authenticateToken } from '@/middlewares/authenticate-token';
 import { parseToken } from '@/middlewares/parse-token';
-import { paramsUsernameSchema } from '@/schemas/followers.schema';
+import { paramsUsernameSchema, queryFollowersPaginationSchema } from '@/schemas/followers.schema';
 
 const userRoutes = Router();
 
@@ -29,14 +29,16 @@ userRoutes.get(
 userRoutes.get(
     '/:username/followers',
     authenticateToken(),
-    validate(paramsUsernameSchema, 'params'),
+    validateParams(paramsUsernameSchema),
+    validateQuery(queryFollowersPaginationSchema),
     handleGetUsersFollowers,
 );
 
 userRoutes.get(
     '/:username/following',
     authenticateToken(),
-    validate(paramsUsernameSchema, 'params'),
+    validateParams(paramsUsernameSchema),
+    validateQuery(queryFollowersPaginationSchema),
     handleGetUsersFollowing,
 );
 
