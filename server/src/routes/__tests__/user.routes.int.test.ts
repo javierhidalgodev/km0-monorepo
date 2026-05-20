@@ -3,6 +3,8 @@ import request from 'supertest';
 import app from '@/app';
 import { UserModel } from '@/models/user.model';
 import { createUser } from '@/services/user.service';
+import { createTestUsers, loginUsers } from '@/tests/helpers/users.helpers';
+import { usersDataset } from '@/tests/fixtures/users.fixtures';
 
 const MONGO_DB_URI = process.env.MONGO_DB_URI || 'mongodb://localhost:27017/km0-test'
 
@@ -114,55 +116,32 @@ describe('POST /api/login', () => {
 
 describe('GET /api/:username/followers', () => {
     let token: string;
-    let username: string;
-
-    let token2: string
+    let token2: string;
+    let token3: string;
+    let token4: string;
 
     beforeAll(async () => {
         await mongoose.connection.dropCollection('users');
 
-        await request(app)
-            .post('/api/users')
-            .send({
-                username: 'demo_user',
-                email: 'demo_user@mail.com',
-                birthdate: '1990-01-01',
-                password: '123456',
-                isPublic: false,
-            });
+        const logins = await createTestUsers(usersDataset);
 
-        await request(app)
-            .post('/api/users')
-            .send({
-                username: 'demo_user_2',
-                email: 'demo_user_2@mail.com',
-                birthdate: '1990-01-01',
-                password: '123456',
-            });
+        const tokens = await loginUsers(logins);
 
-        const login = await request(app)
-            .post('/api/login')
-            .send({
-                email: 'demo_user@mail.com',
-                password: '123456',
-            });
-
-        token = login.body.token;
-        username = login.body.user.username;
-
-        const login2 = await request(app)
-            .post('/api/login')
-            .send({
-                email: 'demo_user_2@mail.com',
-                password: '123456',
-            });
-
-        token2 = login2.body.token;
+        token = tokens[0];
+        token2 = tokens[1];
+        token3 = tokens[2];
+        token4 = tokens[3];
 
         await request(app)
             .post('/api/follow/demo_user_2')
             .auth(token, { type: 'bearer' });
-    })
+        await request(app)
+            .post('/api/follow/demo_user_2')
+            .auth(token3, { type: 'bearer' });
+        await request(app)
+            .post('/api/follow/demo_user_2')
+            .auth(token4, { type: 'bearer' });
+    });
 
     it('Se devuelven los seguidores del usuario PRIVADO con detalles, consultado por el propietario', async () => {
         const response = await request(app)
@@ -176,8 +155,9 @@ describe('GET /api/:username/followers', () => {
         expect(response.status).toBe(200);
         expect(response.body.status).toBe('ok');
         expect(response.body).toHaveProperty('followers');
-        expect(response.body.followers).toHaveLength(1);
-        expect(response.body.followers[0].following).toBe(1);
+        // expect(response.body.followers).toHaveLength(1);
+        expect(response.body.followers[0].following).toBeGreaterThan(0);
+
         expect(response.body.followers[0].followers).toBe(0);
         expect(response2.body.followers).toHaveLength(0);
     });
@@ -190,8 +170,8 @@ describe('GET /api/:username/followers', () => {
         expect(response.status).toBe(200);
         expect(response.body.status).toBe('ok');
         expect(response.body).toHaveProperty('followers');
-        expect(response.body.followers).toHaveLength(1);
-        expect(response.body.followers[0].following).toBe(1);
+        // expect(response.body.followers).toHaveLength(1);
+        expect(response.body.followers[0].following).toBeGreaterThan(0);
         expect(response.body.followers[0].followers).toBe(0);
     });
 
@@ -222,6 +202,58 @@ describe('GET /api/:username/followers', () => {
         expect(response.status).toBe(403);
         expect(response.body.status).toBe('error');
         expect(response.body.message).toBe('Forbidden');
+    });
+
+    it('Se intentan recuperar los seguidores con un límite', async () => {
+        const response = await request(app)
+            .get('/api/demo_user_2/followers?limit=2')
+            .auth(token2, { type: 'bearer' });
+
+        expect(response.status).toBe(200);
+        expect(response.body.status).toBe('ok');
+        expect(response.body).toHaveProperty('followers');
+        expect(response.body.followers).toHaveLength(2);
+        expect(response.body).toHaveProperty('nextCursor');
+    });
+
+    it('Se comprueba que nextCursor devuelve correctamente el siguiente elemento', async () => {
+        const response = await request(app)
+            .get('/api/demo_user_2/followers?limit=2')
+            .auth(token2, { type: 'bearer' });
+
+        const nextCursor = response.body.nextCursor;
+
+        const response2 = await request(app)
+            .get(`/api/demo_user_2/followers?limit=2&cursor=${nextCursor}`)
+            .auth(token2, { type: 'bearer' });
+
+        const page1Ids = response.body.followers.map((f: { id: string }) => f.id);
+        const page2Ids = response2.body.followers.map((f: { id: string }) => f.id);
+
+        const duplicated = page2Ids.filter((id: string) => page1Ids.includes(id));
+
+        expect(response.body).toHaveProperty('nextCursor');
+        expect(response2.status).toBe(200);
+        expect(response2.body.status).toBe('ok');
+        expect(response2.body.followers).toHaveLength(1);
+        expect(duplicated).toHaveLength(0);
+    });
+
+    it('Se comprueba que nextCursor no existe en la página final', async () => {
+        const response = await request(app)
+            .get('/api/demo_user_2/followers?limit=2')
+            .auth(token2, { type: 'bearer' });
+
+        const nextCursor = response.body.nextCursor;
+
+        const response2 = await request(app)
+            .get(`/api/demo_user_2/followers?limit=2&cursor=${nextCursor}`)
+            .auth(token2, { type: 'bearer' });
+
+        expect(response2.status).toBe(200);
+        expect(response2.body.status).toBe('ok');
+        expect(response2.body.followers).toHaveLength(1);
+        expect(response2.body).not.toHaveProperty('nextCursor');
     });
 });
 

@@ -3,11 +3,11 @@ import { AppError } from './app-error';
 import { USER_ERRORS } from '@/constants/messages';
 
 export const ensureUserExists = (user: IUser | null): IUser => {
-    if (!user) {
-        throw new AppError(404, USER_ERRORS.NOT_FOUND);
-    };
+	if (!user) {
+		throw new AppError(404, USER_ERRORS.NOT_FOUND);
+	};
 
-    return user;
+	return user;
 };
 
 export const findUserByID = async (userID: string): Promise<IUser> => {
@@ -28,4 +28,17 @@ export const findUserByUsername = async (username: string): Promise<IUser> => {
 	};
 
 	return user;
+}
+
+// Podría ser también map following
+export const mapFollowers = (followers: IUser[]) => {
+	const formatted = followers.map(f => ({
+		id: f.id,
+		username: f.username,
+		bio: f.bio,
+		followers: f.followers.length,
+		following: f.following.length,
+	}));
+
+	return formatted
 }
